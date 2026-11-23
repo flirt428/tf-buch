@@ -1,0 +1,2247 @@
+<!DOCTYPE html>
+<html lang="de" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Tf-Fahrzeugbuch – Diensthistorie, Tz-Nummer &amp; Fahrzeugmacken</title>
+  <!-- PWA & Mobile Vollbild-Meta-Tags (Android/Chrome & iOS) -->
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Tf-Buch" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <!-- Tailwind CSS für mobile-first Layout & Nachtschicht-Design -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Inter & JetBrains Mono für klare Lesbarkeit im Führerstand -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            rail: {
+              red: '#EC0016',
+              redDark: '#C20012',
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    html {
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      overscroll-behavior-y: contain;
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.35);
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100 font-sans min-h-screen flex flex-col selection:bg-rail-red selection:text-white">
+
+  <!-- KOPFZEILE -->
+  <header class="sticky top-0 z-30 bg-white/90 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 py-3">
+    <div class="max-w-2xl mx-auto flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="w-10 h-10 rounded-xl bg-rail-red flex items-center justify-center text-white shadow-lg shadow-red-600/20 shrink-0">
+          <i data-lucide="train-front" class="w-5 h-5"></i>
+        </div>
+        <div class="min-w-0">
+          <h1 class="font-bold text-base sm:text-lg leading-tight tracking-tight truncate">Tf-Fahrzeugbuch</h1>
+          <p class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+            <span class="truncate">Lokal gespeichert · Tunnel- &amp; Funkloch-tauglich</span>
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 shrink-0">
+        <div id="header-stats-badge" class="hidden sm:flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700"></div>
+        <button id="theme-toggle" type="button" aria-label="Nachtschicht- und Tagmodus umschalten"
+          class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 transition active:scale-95">
+          <i data-lucide="sun" class="w-5 h-5 hidden dark:block text-amber-400"></i>
+          <i data-lucide="moon" class="w-5 h-5 block dark:hidden text-slate-700"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- TOAST-MELDUNGEN (Ersatz für alert()) -->
+  <div id="toast-container" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md pointer-events-none flex flex-col gap-2"></div>
+
+  <!-- DEZENTES PWA-INSTALLATIONS-BANNER (erscheint automatisch bei beforeinstallprompt) -->
+  <div id="pwa-install-banner" class="hidden max-w-2xl w-full mx-auto px-4 pt-3">
+    <div class="bg-slate-900 dark:bg-slate-800/95 text-white rounded-2xl p-3.5 border border-rail-red/40 shadow-lg flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="w-9 h-9 rounded-xl bg-rail-red/20 border border-rail-red/40 flex items-center justify-center text-rail-red shrink-0">
+          <i data-lucide="smartphone" class="w-5 h-5"></i>
+        </div>
+        <div class="min-w-0">
+          <p class="text-xs sm:text-sm font-bold truncate">Als Smartphone-App installieren</p>
+          <p class="text-[11px] text-slate-300 truncate">Vollbild ohne Browserleiste &amp; sofort im Tunnel bereit</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-1.5 shrink-0">
+        <button type="button" id="btn-banner-install"
+          class="px-3 py-2 rounded-xl bg-rail-red hover:bg-rail-redDark text-white text-xs font-bold transition active:scale-95">
+          Installieren
+        </button>
+        <button type="button" id="btn-banner-dismiss" aria-label="Installationshinweis schließen"
+          class="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-700/70 transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HAUPTBEREICH -->
+  <main class="flex-1 max-w-2xl w-full mx-auto px-4 pt-4 pb-28">
+
+    <!-- ==================== BEREICH 1: ERFASSEN ==================== -->
+    <section id="tab-erfassen" class="space-y-5">
+      <!-- Kennzahlen-Leiste -->
+      <div id="quick-stats-grid" class="grid grid-cols-3 gap-2.5"></div>
+
+      <!-- Schnellerfassungs-Formular -->
+      <form id="shift-form" class="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+          <h2 class="font-bold text-base sm:text-lg flex items-center gap-2">
+            <i data-lucide="gauge" class="w-5 h-5 text-rail-red"></i>
+            Fahrzeug-Einsatz erfassen
+          </h2>
+          <span class="text-[11px] font-medium px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">Schnellerfassung</span>
+        </div>
+
+        <!-- Fahrzeugnummer, Tz-Nummer & Baureihe -->
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+          <div class="sm:col-span-5 relative">
+            <div class="flex items-center justify-between gap-1 mb-1.5">
+              <label for="input-vehicle-num" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Fahrzeugnummer
+              </label>
+              <span id="badge-auto-vehicle" class="hidden text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+                Auto-ergänzt
+              </span>
+            </div>
+            <div class="relative">
+              <input type="text" id="input-vehicle-num" autocomplete="off"
+                placeholder="z. B. 407 007"
+                class="w-full font-mono text-base sm:text-lg font-bold pl-3.5 pr-9 py-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 focus:border-rail-red focus:ring-2 focus:ring-rail-red/20 outline-none transition" />
+              <button type="button" id="clear-vehicle-input" aria-label="Eingabe leeren"
+                class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 p-1">
+                <i data-lucide="x" class="w-4 h-4"></i>
+              </button>
+            </div>
+            <!-- Auto-Vervollständigung -->
+            <div id="vehicle-autocomplete" class="hidden absolute left-0 right-0 top-full mt-1 z-20 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl max-h-60 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-700/70"></div>
+          </div>
+
+          <div class="sm:col-span-3">
+            <div class="flex items-center justify-between gap-1 mb-1.5">
+              <label for="input-tz-num" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Tz-Nummer
+              </label>
+              <span id="badge-auto-tz" class="hidden text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+                Auto-ergänzt
+              </span>
+            </div>
+            <input type="text" id="input-tz-num" autocomplete="off"
+              placeholder="z. B. Tz 707"
+              class="w-full font-mono text-base font-bold px-3 py-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 focus:border-rail-red focus:ring-2 focus:ring-rail-red/20 outline-none transition" />
+          </div>
+
+          <div class="sm:col-span-4">
+            <label for="input-series" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+              Baureihe (Auto)
+            </label>
+            <input type="text" id="input-series" autocomplete="off"
+              placeholder="z. B. BR 407 (Velaro D)"
+              class="w-full font-mono text-sm sm:text-base font-semibold px-3.5 py-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 focus:border-rail-red outline-none transition" />
+          </div>
+        </div>
+
+        <p class="text-[11px] text-slate-500 dark:text-slate-400 -mt-1 flex items-start gap-1.5">
+          <i data-lucide="arrow-left-right" class="w-3.5 h-3.5 text-rail-red shrink-0 mt-0.5"></i>
+          <span>Mindestens <strong>Fahrzeugnummer oder Tz-Nummer</strong> angeben – beide Felder ergänzen sich automatisch gegenseitig (<span class="font-mono">407 007 ↔ Tz 707</span>).</span>
+        </p>
+
+        <!-- Live-Macken-Vorschau -->
+        <div id="live-vehicle-preview" class="hidden rounded-xl border p-3.5 transition-all"></div>
+
+        <!-- Datum, Uhrzeit & "Jetzt"-Button -->
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+          <div class="sm:col-span-5">
+            <label for="input-date" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+              Datum *
+            </label>
+            <input type="date" id="input-date" required
+              class="w-full px-3.5 py-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 focus:border-rail-red outline-none text-sm font-medium" />
+          </div>
+          <div class="sm:col-span-4">
+            <label for="input-time" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+              Uhrzeit *
+            </label>
+            <input type="time" id="input-time" required
+              class="w-full px-3.5 py-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 focus:border-rail-red outline-none text-sm font-medium" />
+          </div>
+          <div class="sm:col-span-3">
+            <button type="button" id="btn-set-now"
+              class="w-full py-3 px-3 rounded-xl bg-slate-200/80 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold text-sm flex items-center justify-center gap-1.5 transition active:scale-95 border border-slate-300 dark:border-slate-700">
+              <i data-lucide="clock" class="w-4 h-4 text-rail-red"></i>
+              Jetzt
+            </button>
+          </div>
+        </div>
+
+        <!-- Zugnummer / Strecke / Schichtnotiz -->
+        <div>
+          <label for="input-duty-note" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+            Zugnummer / Strecke / Schichtnotiz (optional)
+          </label>
+          <input type="text" id="input-duty-note"
+            placeholder="z. B. ICE 942 (Frankfurt Hbf – Paris Est), Bereitstellung oder Lz"
+            class="w-full px-3.5 py-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 focus:border-rail-red outline-none text-sm" />
+        </div>
+
+        <!-- Direkter Toggle: Neue Eigenheit / Macke miterfassen -->
+        <div class="pt-0.5">
+          <button type="button" id="toggle-inline-quirk"
+            class="w-full py-2.5 px-3.5 rounded-xl border border-dashed border-amber-500/60 bg-amber-500/10 hover:bg-amber-500/15 text-amber-700 dark:text-amber-300 text-sm font-semibold flex items-center justify-between transition">
+            <span class="flex items-center gap-2">
+              <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-500 shrink-0"></i>
+              <span>Neue Eigenheit / Macke direkt miterfassen?</span>
+            </span>
+            <i data-lucide="chevron-down" id="inline-quirk-chevron" class="w-4 h-4 transition-transform shrink-0"></i>
+          </button>
+
+          <div id="inline-quirk-fields" class="hidden mt-3 p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950/90 border border-slate-200 dark:border-slate-800 space-y-3">
+            <div>
+              <label for="inline-quirk-text" class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
+                Beschreibung der Eigenheit oder Macke
+              </label>
+              <textarea id="inline-quirk-text" rows="2"
+                placeholder="z. B. Fst 1: Sifa-Fußtaster prellt leicht, Zugkraftsteller weich"
+                class="w-full px-3 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 focus:border-amber-500 outline-none text-sm"></textarea>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div>
+                <label for="inline-quirk-cat" class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Kategorie</label>
+                <select id="inline-quirk-cat" class="w-full px-3 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-sm outline-none">
+                  <option value="Eigenheit">Eigenheit</option>
+                  <option value="Macke">Macke</option>
+                  <option value="Bremse">Bremse</option>
+                  <option value="Tür/Einstieg">Tür / Einstieg</option>
+                  <option value="Zugsteuerung/PZB/LZB/ETCS">Zugsteuerung / PZB / LZB / ETCS</option>
+                  <option value="Klima/Heizung">Klima / Heizung</option>
+                  <option value="Akustik/Fahrwerk">Akustik / Fahrwerk</option>
+                  <option value="Sonstiges">Sonstiges</option>
+                </select>
+              </div>
+              <div>
+                <label for="inline-quirk-sev" class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Schweregrad / Status</label>
+                <select id="inline-quirk-sev" class="w-full px-3 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-sm outline-none">
+                  <option value="info">Eigenheit / Hinweis (offen)</option>
+                  <option value="warning">Macke / Störung (offen)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Speichern-Button -->
+        <button type="submit"
+          class="w-full py-3.5 px-5 rounded-xl bg-rail-red hover:bg-rail-redDark text-white font-bold text-base shadow-lg shadow-red-600/25 flex items-center justify-center gap-2 transition active:scale-[0.99]">
+          <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+          Einsatz speichern
+        </button>
+      </form>
+
+      <!-- Letzte 3 Einsätze -->
+      <div class="space-y-2.5">
+        <div class="flex items-center justify-between px-1">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Zuletzt bediente Fahrzeuge</h3>
+          <button type="button" onclick="switchTab('historie')" class="text-xs font-semibold text-rail-red hover:underline">Zur Historie →</button>
+        </div>
+        <div id="recent-shifts-list" class="space-y-2.5"></div>
+      </div>
+    </section>
+
+    <!-- ==================== BEREICH 2: FAHRZEUGE ==================== -->
+    <section id="tab-fahrzeuge" class="hidden space-y-4">
+      <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 space-y-3">
+        <div class="flex items-center justify-between gap-2">
+          <div>
+            <h2 class="font-bold text-lg flex items-center gap-2">
+              <i data-lucide="wrench" class="w-5 h-5 text-amber-500"></i>
+              Fahrzeugakte &amp; Macken
+            </h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Fahrzeugnummer, Tz-Nummer, Einsätze &amp; hinterlegte Eigenheiten/Macken</p>
+          </div>
+          <button type="button" onclick="openQuirkModal()"
+            class="px-3.5 py-2.5 rounded-xl bg-rail-red hover:bg-rail-redDark text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 shadow-md shadow-red-600/20 active:scale-95 transition shrink-0">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            Neue Notiz
+          </button>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-2.5">
+          <div class="relative flex-1">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+            <input type="text" id="vehicle-search"
+              placeholder="Suche nach Fzg-Nr., Tz (z. B. 707 / Tz 707), BR oder Text..."
+              class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 focus:border-rail-red outline-none text-sm" />
+          </div>
+          <select id="vehicle-quirk-filter" class="px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-sm outline-none font-medium">
+            <option value="ALL">Alle Fahrzeuge</option>
+            <option value="OPEN_QUIRKS">Mit offenen Macken/Eigenheiten</option>
+            <option value="WARNINGS">Nur Macken / Störungen</option>
+            <option value="INFO_ONLY">Nur Eigenheiten / Hinweise</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="vehicles-database-list" class="space-y-3"></div>
+    </section>
+
+    <!-- ==================== BEREICH 3: HISTORIE ==================== -->
+    <section id="tab-historie" class="hidden space-y-4">
+      <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 space-y-3">
+        <div class="flex items-center justify-between">
+          <h2 class="font-bold text-lg flex items-center gap-2">
+            <i data-lucide="history" class="w-5 h-5 text-rail-red"></i>
+            Chronologische Diensthistorie
+          </h2>
+          <span id="history-count-badge" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">0 Einträge</span>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-2.5">
+          <div class="relative flex-1">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+            <input type="text" id="history-search"
+              placeholder="Fzg-Nr., Tz-Nr., Baureihe, Zug/Strecke oder Macken durchsuchen..."
+              class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 focus:border-rail-red outline-none text-sm" />
+          </div>
+          <select id="history-series-filter" class="px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-sm outline-none font-medium">
+            <option value="ALL">Alle Baureihen</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="full-history-list" class="space-y-3"></div>
+    </section>
+
+    <!-- ==================== BEREICH 4: BACKUP ==================== -->
+    <section id="tab-backup" class="hidden space-y-4">
+      <!-- PWA-Installations-Karte -->
+      <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 space-y-3.5">
+        <div class="flex items-start justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-rail-red/10 border border-rail-red/25 flex items-center justify-center text-rail-red shrink-0">
+              <i data-lucide="smartphone" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h2 class="font-bold text-base sm:text-lg">App auf Smartphone installieren (PWA)</h2>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Homescreen-Icon, Vollbildmodus &amp; Offline-Cache</p>
+            </div>
+          </div>
+          <span id="pwa-status-badge" class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 shrink-0">
+            Status wird geprüft…
+          </span>
+        </div>
+
+        <p id="pwa-status-description" class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed"></p>
+
+        <div id="pwa-install-action-row" class="flex flex-col sm:flex-row gap-2.5">
+          <button type="button" id="btn-pwa-install"
+            class="w-full py-3 px-4 rounded-xl bg-rail-red hover:bg-rail-redDark disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-sm shadow-lg shadow-red-600/20 flex items-center justify-center gap-2 transition active:scale-95">
+            <i data-lucide="download-cloud" class="w-4 h-4"></i>
+            <span>Jetzt als App installieren</span>
+          </button>
+        </div>
+
+        <div id="pwa-manual-guide" class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-300 space-y-1.5">
+          <p class="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
+            <i data-lucide="info" class="w-3.5 h-3.5 text-rail-red shrink-0"></i>
+            Manuelle Installation auf dem Smartphone:
+          </p>
+          <ul class="list-disc pl-4 space-y-1">
+            <li><strong>Android (Chrome):</strong> Oben rechts auf <span class="font-mono font-bold">⋮</span> tippen → <strong>„Zum Startbildschirm hinzufügen“</strong> oder <strong>„App installieren“</strong> wählen.</li>
+            <li><strong>iPhone / iPad (Safari):</strong> Unten auf das <strong>Teilen-Symbol</strong> tippen → <strong>„Zum Home-Bildschirm“</strong> auswählen.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 space-y-4">
+        <div class="flex items-center gap-2.5 border-b border-slate-100 dark:border-slate-800 pb-3">
+          <i data-lucide="database" class="w-5 h-5 text-rail-red"></i>
+          <div>
+            <h2 class="font-bold text-lg">Offline-Speicher &amp; JSON-Backup</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Alle Daten liegen lokal im Browser – auch ohne Netz in Tunneln oder Funklöchern verfügbar.</p>
+          </div>
+        </div>
+
+        <div id="backup-stats-box" class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 grid grid-cols-3 gap-2 text-center"></div>
+
+        <!-- Export & Datei-Upload -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+          <button type="button" id="btn-export-json"
+            class="py-3.5 px-4 rounded-xl bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 text-white font-semibold text-sm flex items-center justify-center gap-2 border border-slate-700 transition active:scale-95">
+            <i data-lucide="download" class="w-4 h-4 text-emerald-400"></i>
+            JSON-Backup exportieren
+          </button>
+
+          <label class="py-3.5 px-4 rounded-xl bg-slate-100 dark:bg-slate-950 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 font-semibold text-sm flex items-center justify-center gap-2 border border-slate-300 dark:border-slate-700 cursor-pointer transition active:scale-95">
+            <i data-lucide="upload" class="w-4 h-4 text-amber-400"></i>
+            JSON-Datei wählen
+            <input type="file" id="input-import-json-file" accept=".json,application/json" class="hidden" />
+          </label>
+        </div>
+
+        <!-- JSON Einfügen + Merge / Ersetzen Modus -->
+        <div class="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-3">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <label for="import-json-textarea" class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              JSON-Backup direkt einfügen / prüfen
+            </label>
+            <div class="flex items-center gap-3 text-xs font-medium">
+              <label class="flex items-center gap-1.5 cursor-pointer">
+                <input type="radio" name="import-mode" value="merge" checked class="text-rail-red focus:ring-rail-red" />
+                <span>Zusammenführen (Merge)</span>
+              </label>
+              <label class="flex items-center gap-1.5 cursor-pointer">
+                <input type="radio" name="import-mode" value="replace" class="text-rail-red focus:ring-rail-red" />
+                <span>Bestehendes ersetzen</span>
+              </label>
+            </div>
+          </div>
+
+          <textarea id="import-json-textarea" rows="4"
+            placeholder='{"version":1,"exportedAt":"...","data":{"shifts":[...],"quirks":[...]}}'
+            class="w-full font-mono text-xs p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 focus:border-rail-red outline-none"></textarea>
+
+          <button type="button" id="btn-import-json-text"
+            class="w-full py-2.5 px-4 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-700 dark:text-amber-300 font-bold text-sm border border-amber-500/40 flex items-center justify-center gap-2 transition">
+            <i data-lucide="file-check-2" class="w-4 h-4"></i>
+            Eingefügtes JSON importieren
+          </button>
+        </div>
+      </div>
+
+      <!-- Beispieldaten & Zurücksetzen -->
+      <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 space-y-3">
+        <h3 class="font-bold text-base flex items-center gap-2">
+          <i data-lucide="sliders" class="w-4 h-4 text-slate-400"></i>
+          Beispieldaten &amp; Zurücksetzen
+        </h3>
+        <div class="flex flex-col sm:flex-row gap-2.5">
+          <button type="button" id="btn-load-demo"
+            class="flex-1 py-3 px-4 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700 transition">
+            <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+            Beispieldaten laden
+          </button>
+          <button type="button" id="btn-clear-all"
+            class="flex-1 py-3 px-4 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 border border-red-500/30 transition">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+            Alle Daten löschen
+          </button>
+        </div>
+
+        <div id="delete-confirm-box" class="hidden p-3.5 rounded-xl bg-red-500/10 border border-red-500/40 space-y-2.5">
+          <p class="text-xs font-medium text-red-700 dark:text-red-300">
+            Sicherheitsabfrage: Alle erfassten Einsätze, Tz-Zuordnungen und Fahrzeugmacken unwiderruflich löschen?
+          </p>
+          <div class="flex gap-2">
+            <button type="button" id="btn-confirm-wipe" class="px-3.5 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-bold">Ja, unwiderruflich löschen</button>
+            <button type="button" id="btn-cancel-wipe" class="px-3.5 py-2 rounded-lg bg-slate-200 dark:bg-slate-800 text-xs font-semibold">Abbrechen</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- UNTERE NAVIGATION -->
+  <nav class="fixed bottom-0 left-0 right-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800">
+    <div class="max-w-2xl mx-auto grid grid-cols-4 gap-1 px-2 py-1.5">
+      <button type="button" data-tab="erfassen" class="nav-btn active flex flex-col items-center justify-center py-2 px-1 rounded-xl text-rail-red bg-rail-red/10 font-semibold transition">
+        <i data-lucide="plus-square" class="w-5 h-5 mb-0.5"></i>
+        <span class="text-[11px]">Erfassen</span>
+      </button>
+      <button type="button" data-tab="fahrzeuge" class="nav-btn flex flex-col items-center justify-center py-2 px-1 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition relative">
+        <i data-lucide="train" class="w-5 h-5 mb-0.5"></i>
+        <span class="text-[11px]">Fahrzeuge</span>
+        <span id="nav-quirk-dot" class="hidden absolute top-1.5 right-1/4 w-2 h-2 rounded-full bg-amber-500"></span>
+      </button>
+      <button type="button" data-tab="historie" class="nav-btn flex flex-col items-center justify-center py-2 px-1 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition">
+        <i data-lucide="history" class="w-5 h-5 mb-0.5"></i>
+        <span class="text-[11px]">Historie</span>
+      </button>
+      <button type="button" data-tab="backup" class="nav-btn flex flex-col items-center justify-center py-2 px-1 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition">
+        <i data-lucide="shield-check" class="w-5 h-5 mb-0.5"></i>
+        <span class="text-[11px]">Backup</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- MODAL: MACKE / EIGENHEIT ANLEGEN ODER BEARBEITEN -->
+  <div id="quirk-modal" class="hidden fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white dark:bg-slate-900 w-full max-w-lg rounded-t-3xl sm:rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+        <h3 id="modal-title" class="font-bold text-lg flex items-center gap-2">
+          <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-500"></i>
+          Eigenheit / Macke erfassen
+        </h3>
+        <button type="button" onclick="closeQuirkModal()" aria-label="Modal schließen"
+          class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-200">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="quirk-modal-form" class="space-y-3.5">
+        <input type="hidden" id="modal-quirk-id" />
+
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+          <div class="sm:col-span-5">
+            <div class="flex items-center justify-between gap-1 mb-1">
+              <label for="modal-vehicle-num" class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">Fahrzeugnummer</label>
+              <span id="modal-badge-auto-vehicle" class="hidden text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">Auto</span>
+            </div>
+            <input type="text" id="modal-vehicle-num" placeholder="z. B. 407 007"
+              class="w-full font-mono font-bold px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 focus:border-rail-red outline-none text-sm" />
+          </div>
+          <div class="sm:col-span-3">
+            <div class="flex items-center justify-between gap-1 mb-1">
+              <label for="modal-tz-num" class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">Tz-Nummer</label>
+              <span id="modal-badge-auto-tz" class="hidden text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">Auto</span>
+            </div>
+            <input type="text" id="modal-tz-num" placeholder="Tz 707"
+              class="w-full font-mono font-bold px-2.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 focus:border-rail-red outline-none text-sm" />
+          </div>
+          <div class="sm:col-span-4">
+            <label for="modal-series" class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Baureihe</label>
+            <input type="text" id="modal-series" placeholder="z. B. BR 407 (Velaro D)"
+              class="w-full font-mono font-semibold px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 focus:border-rail-red outline-none text-sm" />
+          </div>
+        </div>
+
+        <div>
+          <label for="modal-quirk-text" class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Beschreibung *</label>
+          <textarea id="modal-quirk-text" rows="3" required placeholder="z. B. Fst 1: Sifa-Fußtaster prellt bei Kälte, Zugkraftsteller hakelig"
+            class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 focus:border-rail-red outline-none text-sm"></textarea>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label for="modal-quirk-cat" class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Kategorie</label>
+            <select id="modal-quirk-cat" class="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-sm outline-none">
+              <option value="Eigenheit">Eigenheit</option>
+              <option value="Macke">Macke</option>
+              <option value="Bremse">Bremse</option>
+              <option value="Tür/Einstieg">Tür / Einstieg</option>
+              <option value="Zugsteuerung/PZB/LZB/ETCS">Zugsteuerung / PZB / LZB / ETCS</option>
+              <option value="Klima/Heizung">Klima / Heizung</option>
+              <option value="Akustik/Fahrwerk">Akustik / Fahrwerk</option>
+              <option value="Sonstiges">Sonstiges</option>
+            </select>
+          </div>
+          <div>
+            <label for="modal-quirk-sev" class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Schweregrad</label>
+            <select id="modal-quirk-sev" class="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-sm outline-none">
+              <option value="info">Eigenheit / Hinweis</option>
+              <option value="warning">Macke / Störung</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="pt-1">
+          <label class="flex items-center gap-2 cursor-pointer text-sm">
+            <input type="checkbox" id="modal-quirk-resolved" class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500" />
+            <span>Als behoben / erledigt markieren</span>
+          </label>
+        </div>
+
+        <div class="flex gap-2.5 pt-2">
+          <button type="button" onclick="closeQuirkModal()" class="flex-1 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 font-semibold text-sm">Abbrechen</button>
+          <button type="submit" class="flex-1 py-3 rounded-xl bg-rail-red hover:bg-rail-redDark text-white font-bold text-sm shadow-lg shadow-red-600/20">Speichern</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // ==================== KONSTANTEN & STORAGE KEYS ====================
+    const STORAGE_KEY_DATA = 'tf_fahrzeugbuch_data_v2';
+    const STORAGE_KEY_LEGACY = 'tf_fahrzeugbuch_data_v1';
+    const STORAGE_KEY_INIT = 'tf_fahrzeugbuch_initialized_v2';
+    const STORAGE_KEY_THEME = 'tf_fahrzeugbuch_theme_v1';
+    const BACKUP_VERSION = 1;
+
+    const SERIES_RULES = {
+      '401': 'BR 401 (ICE 1)',
+      '402': 'BR 402 (ICE 2)',
+      '403': 'BR 403 (ICE 3)',
+      '406': 'BR 406 (ICE 3M)',
+      '407': 'BR 407 (Velaro D)',
+      '408': 'BR 408 (ICE 3neo)',
+      '411': 'BR 411 (ICE-T)',
+      '412': 'BR 412 (ICE 4)',
+      '415': 'BR 415 (ICE-T)',
+      '101': 'BR 101',
+      '111': 'BR 111',
+      '146': 'BR 146',
+      '147': 'BR 147',
+      '185': 'BR 185',
+      '193': 'BR 193 (Vectron)',
+      '612': 'BR 612 (RegioSwinger)',
+      '642': 'BR 642 (Desiro Classic)'
+    };
+
+    let appState = {
+      shifts: [],
+      quirks: []
+    };
+
+    // Bidirektionales Tracking für Hauptformular & Modal:
+    // Merkt sich, ob ein Feld manuell durch den Nutzer eingegeben wurde oder nur auto-ergänzt wurde.
+    const formSyncState = {
+      vehicleManual: false,
+      tzManual: false,
+      vehicleAutoFilled: false,
+      tzAutoFilled: false
+    };
+
+    const modalSyncState = {
+      vehicleManual: false,
+      tzManual: false,
+      vehicleAutoFilled: false,
+      tzAutoFilled: false
+    };
+
+    // ==================== NORMALISIERUNG & BIDIREKTIONALE TZ-LOGIK ====================
+    function normalizeVehicleNumber(raw) {
+      if (!raw) return '';
+      const cleaned = String(raw).trim().toUpperCase().replace(/\s+/g, ' ');
+      // Behandle 4-stellige Baureihen-Notation wie "0812 005" -> "412 005" bzw. EVN
+      const br412Alt = cleaned.match(/\b0812\s*(\d{3})\b/);
+      if (br412Alt) {
+        return `412 ${br412Alt[1]}`;
+      }
+      const evnMatch = cleaned.match(/\b(\d{3})\s*(\d{3,4})(?:-[0-9X])?\b/);
+      if (evnMatch) {
+        return `${evnMatch[1]} ${evnMatch[2]}`;
+      }
+      const simpleMatch = cleaned.match(/^(\d{3})\s*(\d{3,4})$/);
+      if (simpleMatch) {
+        return `${simpleMatch[1]} ${simpleMatch[2]}`;
+      }
+      return cleaned;
+    }
+
+    function normalizeTzNumber(rawTz) {
+      if (!rawTz) return '';
+      const trimmed = String(rawTz).trim();
+      if (!trimmed) return '';
+      const m = trimmed.match(/^(?:tz[\s\-]*)?([a-z0-9]+)$/i);
+      if (m) {
+        return `Tz ${m[1].toUpperCase()}`;
+      }
+      return trimmed.replace(/^tz\s*/i, 'Tz ');
+    }
+
+    function extractTzKey(tzStr) {
+      if (!tzStr) return '';
+      return String(tzStr).trim().toLowerCase().replace(/^tz[\s\-]*/, '');
+    }
+
+    /**
+     * Richtung 1: Leitet aus einer Fahrzeugnummer die Tz-Nummer ab.
+     * Unterstützt Endtriebwagen 0xx sowie 5xx (z. B. 407 007 / 407 507 -> Tz 707).
+     */
+    function suggestTzNumber(vehicleNum) {
+      const norm = normalizeVehicleNumber(vehicleNum);
+      const match = norm.match(/^(\d{3})\s+(\d{3,4})$/);
+      if (!match) return '';
+
+      const prefix = match[1];
+      const rawUnit = parseInt(match[2], 10);
+      if (Number.isNaN(rawUnit)) return '';
+
+      // Bei Endtriebwagen 501-599 (z. B. 407 507, 403 515, 408 507, 411 515) auf Ordnungsnummer 001-099 normieren
+      const unitTwoDigit = (rawUnit >= 501 && rawUnit <= 599) ? (rawUnit - 500) : rawUnit;
+
+      if (prefix === '407') {
+        if (unitTwoDigit >= 1 && unitTwoDigit <= 99) return `Tz ${700 + unitTwoDigit}`;
+        if (rawUnit >= 700 && rawUnit <= 799) return `Tz ${rawUnit}`;
+      }
+      if (prefix === '408') {
+        if (unitTwoDigit >= 1 && unitTwoDigit <= 99) return `Tz ${8000 + unitTwoDigit}`;
+        if (rawUnit >= 8001 && rawUnit <= 8099) return `Tz ${rawUnit}`;
+      }
+      if (prefix === '403') {
+        if (unitTwoDigit >= 1 && unitTwoDigit <= 99) return `Tz ${300 + unitTwoDigit}`;
+      }
+      if (prefix === '406') {
+        if (unitTwoDigit >= 1 && unitTwoDigit <= 99) return `Tz ${4600 + unitTwoDigit}`;
+      }
+      if (prefix === '401') {
+        if (unitTwoDigit >= 1 && unitTwoDigit <= 99) return `Tz ${100 + unitTwoDigit}`;
+      }
+      if (prefix === '402') {
+        if (unitTwoDigit >= 1 && unitTwoDigit <= 99) return `Tz ${200 + unitTwoDigit}`;
+      }
+      if (prefix === '411') {
+        if (unitTwoDigit >= 1 && unitTwoDigit <= 99) return `Tz ${1100 + unitTwoDigit}`;
+      }
+      if (prefix === '415') {
+        if (unitTwoDigit >= 1 && unitTwoDigit <= 99) return `Tz ${1500 + unitTwoDigit}`;
+      }
+      if (prefix === '412') {
+        if (rawUnit >= 1 && rawUnit <= 499) return `Tz ${9000 + rawUnit}`;
+        if (rawUnit >= 9001 && rawUnit <= 9499) return `Tz ${rawUnit}`;
+      }
+
+      return `Tz ${rawUnit}`;
+    }
+
+    /**
+     * Richtung 2: Leitet aus einer Tz-Nummer (z. B. "707", "Tz 707", "Tz 8007", "Tz 9005")
+     * die Stamm-Fahrzeugnummer (Endwagen 1, Ordnungsnummer 0xx) ab.
+     */
+    function suggestVehicleFromTz(tzNum) {
+      const key = extractTzKey(tzNum);
+      if (!key || !/^\d{3,4}$/.test(key)) return '';
+      const code = parseInt(key, 10);
+      if (Number.isNaN(code)) return '';
+
+      const pad3 = (n) => String(n).padStart(3, '0');
+
+      // Tz 701 - 799 -> BR 407 0xx
+      if (code >= 701 && code <= 799) {
+        return `407 ${pad3(code - 700)}`;
+      }
+      // Tz 8001 - 8099 -> BR 408 0xx (ICE 3neo)
+      if (code >= 8001 && code <= 8099) {
+        return `408 ${pad3(code - 8000)}`;
+      }
+      // Tz 301 - 399 -> BR 403 0xx
+      if (code >= 301 && code <= 399) {
+        return `403 ${pad3(code - 300)}`;
+      }
+      // Tz 4601 - 4699 -> BR 406 0xx
+      if (code >= 4601 && code <= 4699) {
+        return `406 ${pad3(code - 4600)}`;
+      }
+      // Tz 101 - 199 -> BR 401 0xx
+      if (code >= 101 && code <= 199) {
+        return `401 ${pad3(code - 100)}`;
+      }
+      // Tz 201 - 299 -> BR 402 0xx
+      if (code >= 201 && code <= 299) {
+        return `402 ${pad3(code - 200)}`;
+      }
+      // Tz 1101 - 1199 -> BR 411 0xx
+      if (code >= 1101 && code <= 1199) {
+        return `411 ${pad3(code - 1100)}`;
+      }
+      // Tz 1501 - 1599 -> BR 415 0xx
+      if (code >= 1501 && code <= 1599) {
+        return `415 ${pad3(code - 1500)}`;
+      }
+      // Tz 9001 - 9499 -> BR 412 xxx (ICE 4: 9005 -> 412 005, 9205 -> 412 205, 9405 -> 412 405)
+      if (code >= 9001 && code <= 9499) {
+        return `412 ${pad3(code - 9000)}`;
+      }
+
+      return '';
+    }
+
+    function detectSeriesFromNumber(vehicleNum, tzNum = '') {
+      const norm = normalizeVehicleNumber(vehicleNum);
+      const match = norm.match(/^(\d{3})/);
+      if (match) {
+        const prefix = match[1];
+        return SERIES_RULES[prefix] || `BR ${prefix}`;
+      }
+
+      const tzKey = extractTzKey(tzNum);
+      if (!tzKey) return '';
+      if (/^7\d{2}$/.test(tzKey)) return 'BR 407 (Velaro D)';
+      if (/^1\d{2}$/.test(tzKey)) return 'BR 401 (ICE 1)';
+      if (/^2\d{2}$/.test(tzKey)) return 'BR 402 (ICE 2)';
+      if (/^3\d{2}$/.test(tzKey)) return 'BR 403 (ICE 3)';
+      if (/^46\d{2}$/.test(tzKey)) return 'BR 406 (ICE 3M)';
+      if (/^80\d{2}$/.test(tzKey)) return 'BR 408 (ICE 3neo)';
+      if (/^11\d{2}$/.test(tzKey)) return 'BR 411 (ICE-T)';
+      if (/^15\d{2}$/.test(tzKey)) return 'BR 415 (ICE-T)';
+      if (/^9[0-4]\d{2}$/.test(tzKey)) return 'BR 412 (ICE 4)';
+      return '';
+    }
+
+    function getPrimaryVehicleLabel(vehicleNum, tzNum = '') {
+      const normVeh = normalizeVehicleNumber(vehicleNum);
+      const normTz = normalizeTzNumber(tzNum);
+      return normVeh || normTz || 'Unbekanntes Fahrzeug';
+    }
+
+    function getSecondaryTzLabel(vehicleNum, tzNum = '') {
+      const normVeh = normalizeVehicleNumber(vehicleNum);
+      const normTz = normalizeTzNumber(tzNum);
+      if (!normTz) return '';
+      if (!normVeh) return '';
+      return normTz;
+    }
+
+    function escapeHTML(str) {
+      if (str === undefined || str === null) return '';
+      return String(str).replace(/[&<>"']/g, m => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[m]));
+    }
+
+    function formatDateGerman(isoDate) {
+      if (!isoDate) return '';
+      const parts = isoDate.split('-');
+      if (parts.length !== 3) return isoDate;
+      return `${parts[2]}.${parts[1]}.${parts[0]}`;
+    }
+
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      const palette = type === 'error'
+        ? 'bg-red-600 text-white border-red-400'
+        : type === 'warning'
+        ? 'bg-amber-500 text-slate-950 border-amber-300'
+        : 'bg-slate-900 dark:bg-emerald-600 text-white border-emerald-400/30';
+
+      toast.className = `${palette} px-4 py-3 rounded-xl shadow-xl border text-sm font-semibold transition-all duration-300 pointer-events-auto`;
+      toast.textContent = message;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', '-translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    function setCurrentDateTime() {
+      const now = new Date();
+      document.getElementById('input-date').value = now.toISOString().split('T')[0];
+      const hh = String(now.getHours()).padStart(2, '0');
+      const mm = String(now.getMinutes()).padStart(2, '0');
+      document.getElementById('input-time').value = `${hh}:${mm}`;
+    }
+
+    // ==================== BEISPIELDATEN ====================
+    function getDemoData() {
+      const today = new Date();
+      const offsetDate = (days) => {
+        const d = new Date(today);
+        d.setDate(d.getDate() - days);
+        return d.toISOString().split('T')[0];
+      };
+
+      return {
+        shifts: [
+          {
+            id: 'sh-1',
+            vehicleNumber: '407 007',
+            tzNumber: 'Tz 707',
+            series: 'BR 407 (Velaro D)',
+            date: offsetDate(0),
+            time: '06:12',
+            note: 'ICE 942 (Frankfurt Hbf – Paris Est)'
+          },
+          {
+            id: 'sh-2',
+            vehicleNumber: '412 005',
+            tzNumber: 'Tz 9005',
+            series: 'BR 412 (ICE 4)',
+            date: offsetDate(0),
+            time: '11:45',
+            note: 'ICE 573 (Frankfurt Hbf – Berlin Ostbf)'
+          },
+          {
+            id: 'sh-3',
+            vehicleNumber: '401 012',
+            tzNumber: 'Tz 112',
+            series: 'BR 401 (ICE 1)',
+            date: offsetDate(1),
+            time: '15:20',
+            note: 'ICE 374 (Basel SBB – Berlin)'
+          },
+          {
+            id: 'sh-4',
+            vehicleNumber: '403 015',
+            tzNumber: 'Tz 315',
+            series: 'BR 403 (ICE 3)',
+            date: offsetDate(3),
+            time: '08:05',
+            note: 'ICE 525 (Köln Hbf – München Hbf)'
+          }
+        ],
+        quirks: [
+          {
+            id: 'qk-1',
+            vehicleNumber: '407 007',
+            tzNumber: 'Tz 707',
+            series: 'BR 407 (Velaro D)',
+            text: 'Fst 1: Übergang von elektrischer Bremse auf Druckluftbremse bei Nässe frühzeitig beobachten.',
+            category: 'Bremse',
+            severity: 'info',
+            resolved: false,
+            createdAt: offsetDate(2)
+          },
+          {
+            id: 'qk-2',
+            vehicleNumber: '412 005',
+            tzNumber: 'Tz 9005',
+            series: 'BR 412 (ICE 4)',
+            text: 'Sifa-Fußtaster rechts prellt gelegentlich – bei Bedarf Handtaster nutzen.',
+            category: 'Zugsteuerung/PZB/LZB/ETCS',
+            severity: 'warning',
+            resolved: false,
+            createdAt: offsetDate(1)
+          },
+          {
+            id: 'qk-3',
+            vehicleNumber: '401 012',
+            tzNumber: 'Tz 112',
+            series: 'BR 401 (ICE 1)',
+            text: 'Führerraum-Heizung Fst 2 regelt etwas träge, frühzeitig vorwählen.',
+            category: 'Klima/Heizung',
+            severity: 'info',
+            resolved: false,
+            createdAt: offsetDate(4)
+          },
+          {
+            id: 'qk-4',
+            vehicleNumber: '401 012',
+            tzNumber: 'Tz 112',
+            series: 'BR 401 (ICE 1)',
+            text: 'Scheibenwischer-Intervallstufe 1 ohne Funktion.',
+            category: 'Macke',
+            severity: 'warning',
+            resolved: true,
+            createdAt: offsetDate(10)
+          }
+        ]
+      };
+    }
+
+    // ==================== DATEN-NORMALISIERUNG & SPEICHER ====================
+    function sanitizeDataset(rawObj) {
+      if (!rawObj || typeof rawObj !== 'object') {
+        throw new Error('Ungültiges JSON-Objekt.');
+      }
+      const source = rawObj.data && typeof rawObj.data === 'object' ? rawObj.data : rawObj;
+      const rawShifts = Array.isArray(source.shifts) ? source.shifts : (Array.isArray(source.entries) ? source.entries : null);
+      const rawQuirks = Array.isArray(source.quirks) ? source.quirks : null;
+
+      if (!rawShifts || !rawQuirks) {
+        throw new Error('Felder "shifts" und "quirks" fehlen im Backup.');
+      }
+
+      const shifts = rawShifts
+        .filter(s => s && (s.vehicleNumber || s.tzNumber))
+        .map((s, idx) => {
+          let vehicleNumber = normalizeVehicleNumber(s.vehicleNumber || '');
+          let tzNumber = s.tzNumber ? normalizeTzNumber(s.tzNumber) : suggestTzNumber(vehicleNumber);
+          if (!vehicleNumber && tzNumber) {
+            vehicleNumber = suggestVehicleFromTz(tzNumber);
+          }
+          const series = (s.series && String(s.series).trim()) || detectSeriesFromNumber(vehicleNumber, tzNumber) || 'Unbekannte BR';
+          return {
+            id: String(s.id || `sh-${Date.now()}-${idx}`),
+            vehicleNumber,
+            tzNumber,
+            series,
+            date: String(s.date || new Date().toISOString().split('T')[0]),
+            time: String(s.time || '00:00'),
+            note: String(s.note || '').trim()
+          };
+        });
+
+      const quirks = rawQuirks
+        .filter(q => q && (q.vehicleNumber || q.tzNumber) && q.text)
+        .map((q, idx) => {
+          let vehicleNumber = normalizeVehicleNumber(q.vehicleNumber || '');
+          let tzNumber = q.tzNumber ? normalizeTzNumber(q.tzNumber) : suggestTzNumber(vehicleNumber);
+          if (!vehicleNumber && tzNumber) {
+            vehicleNumber = suggestVehicleFromTz(tzNumber);
+          }
+          const series = (q.series && String(q.series).trim()) || detectSeriesFromNumber(vehicleNumber, tzNumber) || 'Unbekannte BR';
+          return {
+            id: String(q.id || `qk-${Date.now()}-${idx}`),
+            vehicleNumber,
+            tzNumber,
+            series,
+            text: String(q.text).trim(),
+            category: String(q.category || 'Eigenheit').trim(),
+            severity: q.severity === 'warning' ? 'warning' : 'info',
+            resolved: Boolean(q.resolved),
+            createdAt: String(q.createdAt || new Date().toISOString().split('T')[0])
+          };
+        });
+
+      return { shifts, quirks };
+    }
+
+    function loadState() {
+      try {
+        const rawV2 = localStorage.getItem(STORAGE_KEY_DATA);
+        const rawV1 = localStorage.getItem(STORAGE_KEY_LEGACY);
+        const isInit = localStorage.getItem(STORAGE_KEY_INIT);
+
+        if (rawV2) {
+          appState = sanitizeDataset(JSON.parse(rawV2));
+        } else if (rawV1) {
+          appState = sanitizeDataset(JSON.parse(rawV1));
+          localStorage.setItem(STORAGE_KEY_INIT, 'true');
+          saveState(false);
+        } else if (!isInit) {
+          appState = getDemoData();
+          localStorage.setItem(STORAGE_KEY_INIT, 'true');
+          saveState(false);
+        }
+      } catch (err) {
+        console.error('Fehler beim Laden:', err);
+        showToast('Lokaler Speicher konnte nicht vollständig geladen werden.', 'error');
+      }
+    }
+
+    function saveState(shouldRender = true) {
+      try {
+        localStorage.setItem(STORAGE_KEY_DATA, JSON.stringify(appState));
+        if (shouldRender) renderAll();
+      } catch (err) {
+        console.error('Speicherfehler:', err);
+        showToast('Speichern im Browser fehlgeschlagen.', 'error');
+      }
+    }
+
+    // ==================== VERKNÜPFUNG FAHRZEUGNUMMER & TZ-NUMMER ====================
+    function doesMatchVehicle(itemVehicleNum, itemTzNum, targetVehicleNum, targetTzNum) {
+      const normA = normalizeVehicleNumber(itemVehicleNum);
+      const normB = normalizeVehicleNumber(targetVehicleNum);
+      const tzKeyA = extractTzKey(itemTzNum);
+      const tzKeyB = extractTzKey(targetTzNum);
+
+      const numHit = Boolean(normA && normB && normA === normB);
+      const tzHit = Boolean(tzKeyA && tzKeyB && tzKeyA === tzKeyB);
+      return numHit || tzHit;
+    }
+
+    function getAllVehiclesSummary() {
+      const map = new Map();
+
+      const ensureEntry = (rawNum, rawTz, rawSeries) => {
+        const normNum = normalizeVehicleNumber(rawNum);
+        const normTz = normalizeTzNumber(rawTz);
+        const key = normNum || (normTz ? `TZ:${extractTzKey(normTz)}` : '');
+        if (!key) return null;
+
+        if (!map.has(key)) {
+          map.set(key, {
+            key,
+            vehicleNumber: normNum,
+            tzNumber: normTz || suggestTzNumber(normNum),
+            series: rawSeries || detectSeriesFromNumber(normNum, normTz) || 'Unbekannte BR',
+            shiftCount: 0,
+            lastShiftDate: '',
+            lastShiftTime: '',
+            lastNote: ''
+          });
+        }
+        const entry = map.get(key);
+        if (normNum && !entry.vehicleNumber) entry.vehicleNumber = normNum;
+        if (normTz && !entry.tzNumber) entry.tzNumber = normTz;
+        if (rawSeries && entry.series === 'Unbekannte BR') entry.series = rawSeries;
+        return entry;
+      };
+
+      const sortedShifts = [...appState.shifts].sort((a, b) => `${b.date} ${b.time}`.localeCompare(`${a.date} ${a.time}`));
+      sortedShifts.forEach(s => {
+        const entry = ensureEntry(s.vehicleNumber, s.tzNumber, s.series);
+        if (!entry) return;
+        entry.shiftCount += 1;
+        if (!entry.lastShiftDate) {
+          entry.lastShiftDate = s.date;
+          entry.lastShiftTime = s.time;
+          entry.lastNote = s.note || '';
+        }
+      });
+
+      appState.quirks.forEach(q => {
+        ensureEntry(q.vehicleNumber, q.tzNumber, q.series);
+      });
+
+      return Array.from(map.values()).map(v => {
+        const quirks = appState.quirks
+          .filter(q => doesMatchVehicle(q.vehicleNumber, q.tzNumber, v.vehicleNumber, v.tzNumber))
+          .sort((a, b) => Number(a.resolved) - Number(b.resolved));
+        const openQuirks = quirks.filter(q => !q.resolved);
+        return {
+          ...v,
+          quirks,
+          openCount: openQuirks.length,
+          hasWarning: openQuirks.some(q => q.severity === 'warning'),
+          hasInfo: openQuirks.some(q => q.severity !== 'warning')
+        };
+      }).sort((a, b) => {
+        const stampA = a.lastShiftDate ? `${a.lastShiftDate} ${a.lastShiftTime}` : '0000-00-00 00:00';
+        const stampB = b.lastShiftDate ? `${b.lastShiftDate} ${b.lastShiftTime}` : '0000-00-00 00:00';
+        return stampB.localeCompare(stampA) || a.vehicleNumber.localeCompare(b.vehicleNumber);
+      });
+    }
+
+    /**
+     * Bidirektionale Synchronisations-Hilfe für ein Feldpaar (Fahrzeugnummer <-> Tz-Nummer)
+     */
+    function syncFromVehicleInput(vehEl, tzEl, serEl, stateObj, badgeVehEl, badgeTzEl) {
+      const rawVeh = vehEl.value;
+      const trimmedVeh = rawVeh.trim();
+
+      if (!trimmedVeh) {
+        stateObj.vehicleManual = false;
+        stateObj.vehicleAutoFilled = false;
+        badgeVehEl.classList.add('hidden');
+
+        // Wenn Tz nur auto-ergänzt war, ebenfalls wieder leeren
+        if (!stateObj.tzManual || stateObj.tzAutoFilled) {
+          tzEl.value = '';
+          stateObj.tzManual = false;
+          stateObj.tzAutoFilled = false;
+          badgeTzEl.classList.add('hidden');
+        }
+        return;
+      }
+
+      stateObj.vehicleManual = true;
+      stateObj.vehicleAutoFilled = false;
+      badgeVehEl.classList.add('hidden');
+
+      const normVeh = normalizeVehicleNumber(trimmedVeh);
+
+      // Nur Tz überschreiben, wenn Tz nicht manuell vom Nutzer eingegeben wurde
+      if (!stateObj.tzManual || stateObj.tzAutoFilled || !tzEl.value.trim()) {
+        const known = getAllVehiclesSummary().find(v =>
+          normVeh && normalizeVehicleNumber(v.vehicleNumber) === normVeh && v.tzNumber
+        );
+        const derivedTz = (known && known.tzNumber) ? known.tzNumber : suggestTzNumber(normVeh);
+
+        if (derivedTz) {
+          tzEl.value = derivedTz;
+          stateObj.tzAutoFilled = true;
+          stateObj.tzManual = false;
+          badgeTzEl.classList.remove('hidden');
+        } else if (stateObj.tzAutoFilled) {
+          tzEl.value = '';
+          stateObj.tzAutoFilled = false;
+          badgeTzEl.classList.add('hidden');
+        }
+      }
+
+      const detectedSeries = detectSeriesFromNumber(normVeh, tzEl.value);
+      if (detectedSeries) {
+        serEl.value = detectedSeries;
+      }
+    }
+
+    function syncFromTzInput(vehEl, tzEl, serEl, stateObj, badgeVehEl, badgeTzEl) {
+      const rawTz = tzEl.value;
+      const trimmedTz = rawTz.trim();
+
+      if (!trimmedTz) {
+        stateObj.tzManual = false;
+        stateObj.tzAutoFilled = false;
+        badgeTzEl.classList.add('hidden');
+
+        // Wenn Fahrzeugnummer nur auto-ergänzt war, ebenfalls wieder leeren
+        if (!stateObj.vehicleManual || stateObj.vehicleAutoFilled) {
+          vehEl.value = '';
+          stateObj.vehicleManual = false;
+          stateObj.vehicleAutoFilled = false;
+          badgeVehEl.classList.add('hidden');
+        }
+        return;
+      }
+
+      stateObj.tzManual = true;
+      stateObj.tzAutoFilled = false;
+      badgeTzEl.classList.add('hidden');
+
+      const tzKey = extractTzKey(trimmedTz);
+
+      // Nur Fahrzeugnummer überschreiben, wenn diese nicht manuell vom Nutzer eingegeben wurde
+      if (!stateObj.vehicleManual || stateObj.vehicleAutoFilled || !vehEl.value.trim()) {
+        const known = getAllVehiclesSummary().find(v =>
+          tzKey && extractTzKey(v.tzNumber) === tzKey && v.vehicleNumber
+        );
+        const derivedVehicle = (known && known.vehicleNumber) ? known.vehicleNumber : suggestVehicleFromTz(trimmedTz);
+
+        if (derivedVehicle) {
+          vehEl.value = derivedVehicle;
+          stateObj.vehicleAutoFilled = true;
+          stateObj.vehicleManual = false;
+          badgeVehEl.classList.remove('hidden');
+        } else if (stateObj.vehicleAutoFilled) {
+          vehEl.value = '';
+          stateObj.vehicleAutoFilled = false;
+          badgeVehEl.classList.add('hidden');
+        }
+      }
+
+      const detectedSeries = detectSeriesFromNumber(vehEl.value, trimmedTz);
+      if (detectedSeries) {
+        serEl.value = detectedSeries;
+      }
+    }
+
+    function resetSyncBadges(stateObj, badgeVehEl, badgeTzEl) {
+      stateObj.vehicleManual = false;
+      stateObj.tzManual = false;
+      stateObj.vehicleAutoFilled = false;
+      stateObj.tzAutoFilled = false;
+      badgeVehEl.classList.add('hidden');
+      badgeTzEl.classList.add('hidden');
+    }
+
+    // ==================== THEME & NAVIGATION ====================
+    function initTheme() {
+      const saved = localStorage.getItem(STORAGE_KEY_THEME);
+      if (saved === 'light') {
+        document.documentElement.classList.remove('dark');
+      } else {
+        document.documentElement.classList.add('dark');
+      }
+    }
+
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+      const isDark = document.documentElement.classList.contains('dark');
+      localStorage.setItem(STORAGE_KEY_THEME, isDark ? 'dark' : 'light');
+    });
+
+    function switchTab(tabName) {
+      ['erfassen', 'fahrzeuge', 'historie', 'backup'].forEach(name => {
+        document.getElementById(`tab-${name}`).classList.toggle('hidden', name !== tabName);
+      });
+
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        const active = btn.dataset.tab === tabName;
+        btn.classList.toggle('active', active);
+        btn.classList.toggle('text-rail-red', active);
+        btn.classList.toggle('bg-rail-red/10', active);
+        btn.classList.toggle('font-semibold', active);
+        btn.classList.toggle('text-slate-500', !active);
+        btn.classList.toggle('dark:text-slate-400', !active);
+        btn.classList.toggle('font-medium', !active);
+      });
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+    });
+
+    // ==================== ERFASSEN: AUTOCOMPLETE & LIVE-MACKEN-VORSCHAU ====================
+    const vehicleInput = document.getElementById('input-vehicle-num');
+    const tzInput = document.getElementById('input-tz-num');
+    const seriesInput = document.getElementById('input-series');
+    const badgeAutoVehicle = document.getElementById('badge-auto-vehicle');
+    const badgeAutoTz = document.getElementById('badge-auto-tz');
+    const autocompleteBox = document.getElementById('vehicle-autocomplete');
+    const livePreviewBox = document.getElementById('live-vehicle-preview');
+    const clearVehicleBtn = document.getElementById('clear-vehicle-input');
+
+    function updateLiveVehiclePreview(rawVeh, rawTz) {
+      const normVeh = normalizeVehicleNumber(rawVeh);
+      const normTz = normalizeTzNumber(rawTz);
+
+      if ((!normVeh || normVeh.length < 3) && !extractTzKey(normTz)) {
+        livePreviewBox.classList.add('hidden');
+        return;
+      }
+
+      const labelParts = [normVeh, normTz].filter(Boolean);
+      const matchingQuirks = appState.quirks.filter(q => doesMatchVehicle(q.vehicleNumber, q.tzNumber, normVeh, normTz));
+      const openQuirks = matchingQuirks.filter(q => !q.resolved);
+      const resolvedCount = matchingQuirks.filter(q => q.resolved).length;
+
+      livePreviewBox.classList.remove('hidden');
+
+      if (openQuirks.length > 0) {
+        livePreviewBox.className = 'rounded-xl border border-amber-500/50 bg-amber-500/10 p-3.5 space-y-2.5';
+        livePreviewBox.innerHTML = `
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
+              <i data-lucide="alert-triangle" class="w-4 h-4 shrink-0"></i>
+              ${openQuirks.length} offene ${openQuirks.length === 1 ? 'Notiz' : 'Notizen'} für ${escapeHTML(labelParts.join(' · '))}
+            </span>
+            <button type="button" onclick="openQuirkModal('${escapeHTML(normVeh)}', null, '${escapeHTML(normTz)}')"
+              class="text-xs font-bold underline text-amber-700 dark:text-amber-300 shrink-0">+ Hinzufügen</button>
+          </div>
+          <ul class="space-y-1.5">
+            ${openQuirks.map(q => `
+              <li class="text-xs sm:text-sm bg-white/85 dark:bg-slate-900/90 p-2.5 rounded-lg border border-amber-500/20 flex items-start gap-2">
+                <span class="mt-1.5 w-2 h-2 rounded-full shrink-0 ${q.severity === 'warning' ? 'bg-red-500' : 'bg-amber-400'}"></span>
+                <div class="flex-1 min-w-0">
+                  <p class="font-medium text-slate-900 dark:text-slate-100">${escapeHTML(q.text)}</p>
+                  <div class="flex flex-wrap items-center gap-2 mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                    <span class="font-semibold">${escapeHTML(q.category)}</span>
+                    ${q.tzNumber ? `<span class="font-mono text-rail-red font-semibold">${escapeHTML(q.tzNumber)}</span>` : ''}
+                  </div>
+                </div>
+              </li>
+            `).join('')}
+          </ul>
+          ${resolvedCount > 0 ? `<p class="text-[11px] text-slate-500 dark:text-slate-400">+ ${resolvedCount} bereits als behoben markiert</p>` : ''}
+        `;
+      } else {
+        livePreviewBox.className = 'rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 flex items-center justify-between gap-2';
+        livePreviewBox.innerHTML = `
+          <span class="text-xs font-medium text-emerald-700 dark:text-emerald-300 flex items-center gap-2">
+            <i data-lucide="check-circle" class="w-4 h-4 shrink-0"></i>
+            Keine offenen Macken für <strong class="font-mono">${escapeHTML(labelParts.join(' · '))}</strong>.
+          </span>
+          <button type="button" onclick="openQuirkModal('${escapeHTML(normVeh)}', null, '${escapeHTML(normTz)}')"
+            class="text-xs font-bold text-emerald-700 dark:text-emerald-300 underline shrink-0">+ Notiz</button>
+        `;
+      }
+      lucide.createIcons();
+    }
+
+    // Richtung 1: Eingabe in Fahrzeugnummer -> Tz-Nummer & Baureihe ableiten
+    vehicleInput.addEventListener('input', (e) => {
+      syncFromVehicleInput(vehicleInput, tzInput, seriesInput, formSyncState, badgeAutoVehicle, badgeAutoTz);
+      clearVehicleBtn.classList.toggle('hidden', !vehicleInput.value && !tzInput.value);
+      updateLiveVehiclePreview(vehicleInput.value, tzInput.value);
+
+      const q = e.target.value.trim().toLowerCase();
+      const qTzKey = extractTzKey(e.target.value);
+      if (!q) {
+        autocompleteBox.classList.add('hidden');
+        return;
+      }
+
+      const matches = getAllVehiclesSummary().filter(v => {
+        const vNum = (v.vehicleNumber || '').toLowerCase();
+        const vTz = (v.tzNumber || '').toLowerCase();
+        const vTzKey = extractTzKey(v.tzNumber);
+        const vBr = (v.series || '').toLowerCase();
+        return vNum.includes(q) || vTz.includes(q) || vBr.includes(q) || (qTzKey && vTzKey.includes(qTzKey));
+      });
+
+      if (matches.length === 0) {
+        autocompleteBox.classList.add('hidden');
+        return;
+      }
+
+      autocompleteBox.innerHTML = matches.map(v => {
+        const primary = getPrimaryVehicleLabel(v.vehicleNumber, v.tzNumber);
+        const secondaryTz = getSecondaryTzLabel(v.vehicleNumber, v.tzNumber);
+        return `
+          <button type="button"
+            data-num="${escapeHTML(v.vehicleNumber || '')}"
+            data-tz="${escapeHTML(v.tzNumber || '')}"
+            data-series="${escapeHTML(v.series || '')}"
+            class="w-full text-left px-3.5 py-2.5 hover:bg-slate-100 dark:hover:bg-slate-700/70 flex items-center justify-between gap-2 transition">
+            <div class="min-w-0">
+              <span class="font-mono font-bold text-sm">${escapeHTML(primary)}</span>
+              ${secondaryTz ? `<span class="font-mono text-xs font-bold px-1.5 py-0.5 rounded bg-rail-red/10 text-rail-red ml-1.5">${escapeHTML(secondaryTz)}</span>` : ''}
+              <span class="text-xs text-slate-500 dark:text-slate-400 ml-1.5">${escapeHTML(v.series || '')}</span>
+            </div>
+            ${v.openCount > 0
+              ? `<span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-300 shrink-0">${v.openCount} offen</span>`
+              : `<span class="text-[11px] font-medium text-emerald-500 shrink-0">OK</span>`
+            }
+          </button>
+        `;
+      }).join('');
+      autocompleteBox.classList.remove('hidden');
+    });
+
+    // Richtung 2: Eingabe in Tz-Nummer -> Fahrzeugnummer & Baureihe ableiten
+    tzInput.addEventListener('input', () => {
+      syncFromTzInput(vehicleInput, tzInput, seriesInput, formSyncState, badgeAutoVehicle, badgeAutoTz);
+      clearVehicleBtn.classList.toggle('hidden', !vehicleInput.value && !tzInput.value);
+      updateLiveVehiclePreview(vehicleInput.value, tzInput.value);
+    });
+
+    tzInput.addEventListener('blur', (e) => {
+      if (e.target.value.trim()) {
+        e.target.value = normalizeTzNumber(e.target.value);
+        syncFromTzInput(vehicleInput, tzInput, seriesInput, formSyncState, badgeAutoVehicle, badgeAutoTz);
+        updateLiveVehiclePreview(vehicleInput.value, e.target.value);
+      }
+    });
+
+    autocompleteBox.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-num]');
+      if (!btn) return;
+      vehicleInput.value = btn.dataset.num;
+      tzInput.value = btn.dataset.tz || suggestTzNumber(btn.dataset.num);
+      resetSyncBadges(formSyncState, badgeAutoVehicle, badgeAutoTz);
+      formSyncState.vehicleManual = Boolean(vehicleInput.value);
+      formSyncState.tzManual = Boolean(tzInput.value);
+      seriesInput.value = btn.dataset.series || detectSeriesFromNumber(btn.dataset.num, tzInput.value);
+      clearVehicleBtn.classList.remove('hidden');
+      autocompleteBox.classList.add('hidden');
+      updateLiveVehiclePreview(vehicleInput.value, tzInput.value);
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!vehicleInput.contains(e.target) && !autocompleteBox.contains(e.target)) {
+        autocompleteBox.classList.add('hidden');
+      }
+    });
+
+    clearVehicleBtn.addEventListener('click', () => {
+      vehicleInput.value = '';
+      tzInput.value = '';
+      seriesInput.value = '';
+      resetSyncBadges(formSyncState, badgeAutoVehicle, badgeAutoTz);
+      clearVehicleBtn.classList.add('hidden');
+      autocompleteBox.classList.add('hidden');
+      livePreviewBox.classList.add('hidden');
+      vehicleInput.focus();
+    });
+
+    document.getElementById('toggle-inline-quirk').addEventListener('click', () => {
+      document.getElementById('inline-quirk-fields').classList.toggle('hidden');
+      document.getElementById('inline-quirk-chevron').classList.toggle('rotate-180');
+    });
+
+    document.getElementById('btn-set-now').addEventListener('click', () => {
+      setCurrentDateTime();
+      showToast('Aktuelles Datum & Uhrzeit gesetzt.');
+    });
+
+    // ==================== EINSATZ SPEICHERN ====================
+    document.getElementById('shift-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      let vehicleNumber = normalizeVehicleNumber(vehicleInput.value);
+      const rawTz = tzInput.value.trim();
+      let tzNumber = rawTz ? normalizeTzNumber(rawTz) : suggestTzNumber(vehicleNumber);
+
+      if (!vehicleNumber && tzNumber) {
+        vehicleNumber = suggestVehicleFromTz(tzNumber);
+      }
+
+      if (!vehicleNumber && !tzNumber) {
+        showToast('Bitte mindestens Fahrzeugnummer oder Tz-Nummer angeben.', 'error');
+        vehicleInput.focus();
+        return;
+      }
+
+      const series = seriesInput.value.trim() || detectSeriesFromNumber(vehicleNumber, tzNumber) || 'Unbekannte BR';
+      const date = document.getElementById('input-date').value;
+      const time = document.getElementById('input-time').value;
+      const note = document.getElementById('input-duty-note').value.trim();
+      const displayLabel = getPrimaryVehicleLabel(vehicleNumber, tzNumber);
+      const secondaryTz = getSecondaryTzLabel(vehicleNumber, tzNumber);
+
+      appState.shifts.unshift({
+        id: 'sh-' + Date.now(),
+        vehicleNumber,
+        tzNumber,
+        series,
+        date,
+        time,
+        note
+      });
+
+      const quirkText = document.getElementById('inline-quirk-text').value.trim();
+      if (quirkText) {
+        appState.quirks.unshift({
+          id: 'qk-' + (Date.now() + 1),
+          vehicleNumber,
+          tzNumber,
+          series,
+          text: quirkText,
+          category: document.getElementById('inline-quirk-cat').value,
+          severity: document.getElementById('inline-quirk-sev').value,
+          resolved: false,
+          createdAt: date
+        });
+      }
+
+      saveState();
+
+      document.getElementById('input-duty-note').value = '';
+      document.getElementById('inline-quirk-text').value = '';
+      document.getElementById('inline-quirk-fields').classList.add('hidden');
+      document.getElementById('inline-quirk-chevron').classList.remove('rotate-180');
+      vehicleInput.value = vehicleNumber;
+      tzInput.value = tzNumber;
+      setCurrentDateTime();
+      updateLiveVehiclePreview(vehicleNumber, tzNumber);
+
+      const toastSubject = secondaryTz ? `${displayLabel} · ${secondaryTz}` : displayLabel;
+      showToast(quirkText
+        ? `${toastSubject} & Notiz gespeichert!`
+        : `${toastSubject} in Historie gespeichert!`);
+    });
+
+    // ==================== MACKEN MODAL (ANLEGEN / BEARBEITEN) ====================
+    const modalVehInput = document.getElementById('modal-vehicle-num');
+    const modalTzInput = document.getElementById('modal-tz-num');
+    const modalSerInput = document.getElementById('modal-series');
+    const modalBadgeVeh = document.getElementById('modal-badge-auto-vehicle');
+    const modalBadgeTz = document.getElementById('modal-badge-auto-tz');
+
+    function openQuirkModal(prefillVeh = '', quirkId = null, prefillTz = '') {
+      const modal = document.getElementById('quirk-modal');
+      const titleEl = document.getElementById('modal-title');
+      const idInput = document.getElementById('modal-quirk-id');
+      const txtInput = document.getElementById('modal-quirk-text');
+      const catInput = document.getElementById('modal-quirk-cat');
+      const sevInput = document.getElementById('modal-quirk-sev');
+      const resInput = document.getElementById('modal-quirk-resolved');
+
+      resetSyncBadges(modalSyncState, modalBadgeVeh, modalBadgeTz);
+
+      if (quirkId) {
+        const existing = appState.quirks.find(q => q.id === quirkId);
+        if (!existing) return;
+        titleEl.innerHTML = `<i data-lucide="pencil" class="w-5 h-5 text-amber-500"></i> Eigenheit / Macke bearbeiten`;
+        idInput.value = existing.id;
+        modalVehInput.value = existing.vehicleNumber || suggestVehicleFromTz(existing.tzNumber);
+        modalTzInput.value = existing.tzNumber || suggestTzNumber(existing.vehicleNumber);
+        modalSyncState.vehicleManual = Boolean(modalVehInput.value);
+        modalSyncState.tzManual = Boolean(modalTzInput.value);
+        modalSerInput.value = existing.series || detectSeriesFromNumber(modalVehInput.value, modalTzInput.value);
+        txtInput.value = existing.text;
+        catInput.value = existing.category;
+        sevInput.value = existing.severity;
+        resInput.checked = Boolean(existing.resolved);
+      } else {
+        const normVeh = normalizeVehicleNumber(prefillVeh);
+        const normPrefTz = normalizeTzNumber(prefillTz);
+        const known = getAllVehiclesSummary().find(v => doesMatchVehicle(v.vehicleNumber, v.tzNumber, normVeh, normPrefTz));
+        titleEl.innerHTML = `<i data-lucide="alert-triangle" class="w-5 h-5 text-amber-500"></i> Eigenheit / Macke erfassen`;
+        idInput.value = '';
+        modalVehInput.value = normVeh || (known && known.vehicleNumber) || suggestVehicleFromTz(normPrefTz);
+        modalTzInput.value = normPrefTz || (known && known.tzNumber) || suggestTzNumber(modalVehInput.value);
+        modalSyncState.vehicleManual = Boolean(modalVehInput.value);
+        modalSyncState.tzManual = Boolean(modalTzInput.value);
+        modalSerInput.value = detectSeriesFromNumber(modalVehInput.value, modalTzInput.value);
+        txtInput.value = '';
+        catInput.value = 'Eigenheit';
+        sevInput.value = 'info';
+        resInput.checked = false;
+      }
+
+      modal.classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeQuirkModal() {
+      document.getElementById('quirk-modal').classList.add('hidden');
+    }
+
+    modalVehInput.addEventListener('input', () => {
+      syncFromVehicleInput(modalVehInput, modalTzInput, modalSerInput, modalSyncState, modalBadgeVeh, modalBadgeTz);
+    });
+
+    modalTzInput.addEventListener('input', () => {
+      syncFromTzInput(modalVehInput, modalTzInput, modalSerInput, modalSyncState, modalBadgeVeh, modalBadgeTz);
+    });
+
+    modalTzInput.addEventListener('blur', (e) => {
+      if (e.target.value.trim()) {
+        e.target.value = normalizeTzNumber(e.target.value);
+        syncFromTzInput(modalVehInput, modalTzInput, modalSerInput, modalSyncState, modalBadgeVeh, modalBadgeTz);
+      }
+    });
+
+    document.getElementById('quirk-modal-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const id = document.getElementById('modal-quirk-id').value;
+      let vehicleNumber = normalizeVehicleNumber(modalVehInput.value);
+      const rawTz = modalTzInput.value.trim();
+      let tzNumber = rawTz ? normalizeTzNumber(rawTz) : suggestTzNumber(vehicleNumber);
+
+      if (!vehicleNumber && tzNumber) {
+        vehicleNumber = suggestVehicleFromTz(tzNumber);
+      }
+
+      if (!vehicleNumber && !tzNumber) {
+        showToast('Bitte mindestens Fahrzeugnummer oder Tz-Nummer angeben.', 'error');
+        modalVehInput.focus();
+        return;
+      }
+
+      const series = modalSerInput.value.trim() || detectSeriesFromNumber(vehicleNumber, tzNumber) || 'Unbekannte BR';
+      const text = document.getElementById('modal-quirk-text').value.trim();
+      const category = document.getElementById('modal-quirk-cat').value;
+      const severity = document.getElementById('modal-quirk-sev').value;
+      const resolved = document.getElementById('modal-quirk-resolved').checked;
+
+      if (!text) return;
+
+      const label = getPrimaryVehicleLabel(vehicleNumber, tzNumber);
+      const secTz = getSecondaryTzLabel(vehicleNumber, tzNumber);
+
+      if (id) {
+        const idx = appState.quirks.findIndex(q => q.id === id);
+        if (idx !== -1) {
+          appState.quirks[idx] = { ...appState.quirks[idx], vehicleNumber, tzNumber, series, text, category, severity, resolved };
+          showToast('Notiz aktualisiert.');
+        }
+      } else {
+        appState.quirks.unshift({
+          id: 'qk-' + Date.now(),
+          vehicleNumber,
+          tzNumber,
+          series,
+          text,
+          category,
+          severity,
+          resolved,
+          createdAt: new Date().toISOString().split('T')[0]
+        });
+        showToast(`Notiz für ${secTz ? `${label} · ${secTz}` : label} gespeichert.`);
+      }
+
+      saveState();
+      closeQuirkModal();
+      if (vehicleInput.value || tzInput.value) updateLiveVehiclePreview(vehicleInput.value, tzInput.value);
+    });
+
+    function toggleQuirkResolved(quirkId) {
+      const q = appState.quirks.find(item => item.id === quirkId);
+      if (!q) return;
+      q.resolved = !q.resolved;
+      saveState();
+      if (vehicleInput.value || tzInput.value) updateLiveVehiclePreview(vehicleInput.value, tzInput.value);
+      showToast(q.resolved ? 'Als behoben markiert.' : 'Wieder als offen markiert.');
+    }
+
+    function deleteQuirk(quirkId) {
+      appState.quirks = appState.quirks.filter(q => q.id !== quirkId);
+      saveState();
+      if (vehicleInput.value || tzInput.value) updateLiveVehiclePreview(vehicleInput.value, tzInput.value);
+      showToast('Notiz gelöscht.', 'warning');
+    }
+
+    function deleteShift(shiftId) {
+      appState.shifts = appState.shifts.filter(s => s.id !== shiftId);
+      saveState();
+      showToast('Eintrag aus Historie gelöscht.', 'warning');
+    }
+
+    function selectVehicleForNewShift(vehicleNumber, tzNumber = '') {
+      switchTab('erfassen');
+      const normNum = normalizeVehicleNumber(vehicleNumber);
+      const normTz = normalizeTzNumber(tzNumber);
+      const known = getAllVehiclesSummary().find(v => doesMatchVehicle(v.vehicleNumber, v.tzNumber, normNum, normTz));
+      vehicleInput.value = normNum || (known && known.vehicleNumber) || suggestVehicleFromTz(normTz);
+      tzInput.value = normTz || (known && known.tzNumber) || suggestTzNumber(vehicleInput.value);
+      resetSyncBadges(formSyncState, badgeAutoVehicle, badgeAutoTz);
+      formSyncState.vehicleManual = Boolean(vehicleInput.value);
+      formSyncState.tzManual = Boolean(tzInput.value);
+      seriesInput.value = detectSeriesFromNumber(vehicleInput.value, tzInput.value);
+      clearVehicleBtn.classList.toggle('hidden', !vehicleInput.value && !tzInput.value);
+      setCurrentDateTime();
+      updateLiveVehiclePreview(vehicleInput.value, tzInput.value);
+      document.getElementById('input-duty-note').focus();
+    }
+
+    function jumpToVehicleInDatabase(identifier) {
+      switchTab('fahrzeuge');
+      document.getElementById('vehicle-search').value = identifier;
+      renderVehiclesDatabase();
+      lucide.createIcons();
+    }
+
+    // ==================== RENDER-FUNKTIONEN ====================
+    function renderStats() {
+      const totalShifts = appState.shifts.length;
+      const totalVehicles = getAllVehiclesSummary().length;
+      const openQuirks = appState.quirks.filter(q => !q.resolved).length;
+
+      document.getElementById('header-stats-badge').innerHTML = `
+        <span><strong>${totalShifts}</strong> Fahrten</span>
+        <span class="text-slate-400">•</span>
+        <span><strong>${totalVehicles}</strong> Tfz</span>
+        <span class="text-slate-400">•</span>
+        <span class="text-amber-500 font-bold">${openQuirks} offen</span>
+      `;
+
+      document.getElementById('nav-quirk-dot').classList.toggle('hidden', openQuirks === 0);
+
+      document.getElementById('quick-stats-grid').innerHTML = `
+        <div class="bg-white dark:bg-slate-900 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 text-center">
+          <div class="text-xl sm:text-2xl font-extrabold font-mono">${totalShifts}</div>
+          <div class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Einsätze</div>
+        </div>
+        <div onclick="switchTab('fahrzeuge')" class="cursor-pointer bg-white dark:bg-slate-900 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-600 text-center transition">
+          <div class="text-xl sm:text-2xl font-extrabold font-mono">${totalVehicles}</div>
+          <div class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Fahrzeuge</div>
+        </div>
+        <div onclick="switchTab('fahrzeuge')" class="cursor-pointer bg-white dark:bg-slate-900 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-amber-500/50 text-center transition">
+          <div class="text-xl sm:text-2xl font-extrabold font-mono text-amber-500">${openQuirks}</div>
+          <div class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Offene Macken</div>
+        </div>
+      `;
+
+      document.getElementById('backup-stats-box').innerHTML = `
+        <div>
+          <div class="text-lg font-extrabold font-mono">${totalShifts}</div>
+          <div class="text-xs text-slate-500">Einsätze</div>
+        </div>
+        <div>
+          <div class="text-lg font-extrabold font-mono">${totalVehicles}</div>
+          <div class="text-xs text-slate-500">Fahrzeuge</div>
+        </div>
+        <div>
+          <div class="text-lg font-extrabold font-mono text-amber-500">${appState.quirks.length}</div>
+          <div class="text-xs text-slate-500">Macken &amp; Notizen</div>
+        </div>
+      `;
+    }
+
+    function createHistoryCardHTML(shift, allowDelete = false) {
+      const normNum = normalizeVehicleNumber(shift.vehicleNumber);
+      const tzDisplay = normalizeTzNumber(shift.tzNumber) || suggestTzNumber(normNum);
+      const primaryTitle = getPrimaryVehicleLabel(normNum, tzDisplay);
+      const secondaryTz = getSecondaryTzLabel(normNum, tzDisplay);
+      const lookupKey = normNum || tzDisplay;
+      const linkedQuirks = appState.quirks.filter(q => doesMatchVehicle(q.vehicleNumber, q.tzNumber, normNum, tzDisplay));
+      const openLinked = linkedQuirks.filter(q => !q.resolved);
+
+      return `
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 space-y-2.5 transition hover:border-slate-300 dark:hover:border-slate-700">
+          <div class="flex items-start justify-between gap-3">
+            <div class="space-y-1.5 min-w-0 flex-1">
+              <div class="flex flex-wrap items-center gap-2">
+                <button type="button" onclick="selectVehicleForNewShift('${escapeHTML(normNum)}', '${escapeHTML(tzDisplay)}')" title="Erneut auf diesem Fahrzeug erfassen"
+                  class="font-mono font-extrabold text-base sm:text-lg text-slate-900 dark:text-white hover:text-rail-red transition">
+                  ${escapeHTML(primaryTitle)}
+                </button>
+                ${secondaryTz ? `
+                  <span class="font-mono text-xs font-bold px-2 py-0.5 rounded-md bg-rail-red/10 text-rail-red border border-rail-red/20">
+                    ${escapeHTML(secondaryTz)}
+                  </span>
+                ` : ''}
+                <span class="text-xs font-mono font-semibold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                  ${escapeHTML(shift.series || '')}
+                </span>
+                ${openLinked.length > 0 ? `
+                  <button type="button" onclick="jumpToVehicleInDatabase('${escapeHTML(lookupKey)}')"
+                    class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 flex items-center gap-1">
+                    <i data-lucide="alert-triangle" class="w-3 h-3"></i>
+                    ${openLinked.length} offen
+                  </button>
+                ` : ''}
+              </div>
+
+              ${shift.note ? `<p class="text-sm font-medium text-slate-700 dark:text-slate-200">${escapeHTML(shift.note)}</p>` : ''}
+
+              <div class="text-xs text-slate-500 dark:text-slate-400 flex flex-wrap items-center gap-3">
+                <span class="flex items-center gap-1"><i data-lucide="calendar" class="w-3.5 h-3.5"></i> ${formatDateGerman(shift.date)}</span>
+                <span class="flex items-center gap-1"><i data-lucide="clock" class="w-3.5 h-3.5"></i> ${escapeHTML(shift.time)} Uhr</span>
+              </div>
+            </div>
+
+            <div class="flex flex-col items-end gap-1.5 shrink-0">
+              <button type="button" onclick="openQuirkModal('${escapeHTML(normNum)}', null, '${escapeHTML(tzDisplay)}')" title="Eigenheit / Macke erfassen"
+                class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-amber-500/20 text-slate-600 dark:text-slate-300 hover:text-amber-500 transition">
+                <i data-lucide="wrench" class="w-4 h-4"></i>
+              </button>
+              ${allowDelete ? `
+                <button type="button" onclick="deleteShift('${escapeHTML(shift.id)}')" title="Historien-Eintrag löschen"
+                  class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-red-500/20 text-slate-400 hover:text-red-500 transition">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+              ` : ''}
+            </div>
+          </div>
+
+          ${linkedQuirks.length > 0 ? `
+            <div class="pt-2 border-t border-slate-100 dark:border-slate-800/80 space-y-1.5">
+              ${linkedQuirks.map(q => `
+                <div class="text-xs flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg ${q.resolved
+                  ? 'bg-slate-50 dark:bg-slate-950/50 text-slate-500 line-through'
+                  : 'bg-amber-500/10 text-slate-800 dark:text-slate-200'}">
+                  <span class="truncate"><strong>${escapeHTML(q.category)}:</strong> ${escapeHTML(q.text)}</span>
+                  <span class="text-[10px] font-bold uppercase shrink-0 ${q.resolved ? 'text-emerald-500 no-underline' : 'text-amber-600 dark:text-amber-400'}">
+                    ${q.resolved ? 'Behoben' : 'Offen'}
+                  </span>
+                </div>
+              `).join('')}
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }
+
+    function renderRecentShifts() {
+      const container = document.getElementById('recent-shifts-list');
+      const sorted = [...appState.shifts].sort((a, b) => `${b.date} ${b.time}`.localeCompare(`${a.date} ${a.time}`)).slice(0, 3);
+      if (sorted.length === 0) {
+        container.innerHTML = `<div class="text-center py-6 text-xs text-slate-500 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">Noch keine Einsätze erfasst.</div>`;
+        return;
+      }
+      container.innerHTML = sorted.map(s => createHistoryCardHTML(s, false)).join('');
+    }
+
+    function renderVehiclesDatabase() {
+      const q = document.getElementById('vehicle-search').value.trim().toLowerCase();
+      const qTzKey = extractTzKey(q);
+      const filter = document.getElementById('vehicle-quirk-filter').value;
+      const vehicles = getAllVehiclesSummary();
+
+      const filtered = vehicles.filter(v => {
+        if (filter === 'OPEN_QUIRKS' && v.openCount === 0) return false;
+        if (filter === 'WARNINGS' && !v.hasWarning) return false;
+        if (filter === 'INFO_ONLY' && !v.hasInfo) return false;
+
+        if (!q) return true;
+        const numMatch = v.vehicleNumber.toLowerCase().includes(q);
+        const tzMatch = (v.tzNumber || '').toLowerCase().includes(q) || Boolean(qTzKey && extractTzKey(v.tzNumber).includes(qTzKey));
+        const brMatch = v.series.toLowerCase().includes(q);
+        const quirkMatch = v.quirks.some(item =>
+          item.text.toLowerCase().includes(q) ||
+          item.category.toLowerCase().includes(q) ||
+          (item.tzNumber || '').toLowerCase().includes(q)
+        );
+        return numMatch || tzMatch || brMatch || quirkMatch;
+      });
+
+      const listEl = document.getElementById('vehicles-database-list');
+      if (filtered.length === 0) {
+        listEl.innerHTML = `
+          <div class="text-center py-10 px-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-2">
+            <i data-lucide="train" class="w-8 h-8 text-slate-400 mx-auto"></i>
+            <p class="text-sm font-medium text-slate-500">Keine Fahrzeuge für den aktuellen Filter gefunden.</p>
+          </div>
+        `;
+        return;
+      }
+
+      listEl.innerHTML = filtered.map(v => {
+        const tzDisp = normalizeTzNumber(v.tzNumber) || suggestTzNumber(v.vehicleNumber);
+        const primaryTitle = getPrimaryVehicleLabel(v.vehicleNumber, tzDisp);
+        const secondaryTz = getSecondaryTzLabel(v.vehicleNumber, tzDisp);
+        const lastInfo = v.lastShiftDate
+          ? `Letzte Bedienung: ${formatDateGerman(v.lastShiftDate)} · ${escapeHTML(v.lastShiftTime)} Uhr`
+          : 'Bisher nur in Mackenliste erfasst';
+
+        return `
+          <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 space-y-3">
+            <div class="flex items-start justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+              <div class="min-w-0">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="font-mono font-extrabold text-lg text-slate-900 dark:text-white">${escapeHTML(primaryTitle)}</span>
+                  ${secondaryTz ? `
+                    <span class="font-mono text-xs font-extrabold px-2.5 py-0.5 rounded-md bg-rail-red/10 text-rail-red border border-rail-red/25">
+                      ${escapeHTML(secondaryTz)}
+                    </span>
+                  ` : ''}
+                  <span class="text-xs font-mono px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                    ${escapeHTML(v.series || '')}
+                  </span>
+                </div>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  ${v.shiftCount} ${v.shiftCount === 1 ? 'Einsatz' : 'Einsätze'} · ${lastInfo} · <strong class="${v.openCount > 0 ? 'text-amber-500' : ''}">${v.openCount} offen</strong>
+                </p>
+                ${v.lastNote ? `<p class="text-xs text-slate-600 dark:text-slate-300 mt-0.5 truncate">Zuletzt: ${escapeHTML(v.lastNote)}</p>` : ''}
+              </div>
+
+              <div class="flex items-center gap-1.5 shrink-0">
+                <button type="button" onclick="selectVehicleForNewShift('${escapeHTML(v.vehicleNumber || '')}', '${escapeHTML(tzDisp)}')"
+                  class="px-2.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold transition">
+                  + Fahrt
+                </button>
+                <button type="button" onclick="openQuirkModal('${escapeHTML(v.vehicleNumber || '')}', null, '${escapeHTML(tzDisp)}')"
+                  class="px-2.5 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-600 dark:text-amber-400 text-xs font-bold transition">
+                  + Notiz
+                </button>
+              </div>
+            </div>
+
+            ${v.quirks.length === 0 ? `
+              <p class="text-xs text-slate-400 italic">Keine Eigenheiten oder Macken für dieses Fahrzeug hinterlegt.</p>
+            ` : `
+              <div class="space-y-2">
+                ${v.quirks.map(q => `
+                  <div class="p-3 rounded-xl border transition ${q.resolved
+                    ? 'bg-slate-50/70 dark:bg-slate-950/40 border-slate-200/70 dark:border-slate-800/70 opacity-65'
+                    : q.severity === 'warning'
+                    ? 'bg-red-500/5 dark:bg-red-950/20 border-red-500/30'
+                    : 'bg-amber-500/5 dark:bg-amber-950/15 border-amber-500/30'}">
+                    <div class="flex items-start justify-between gap-2">
+                      <div class="space-y-1 flex-1 min-w-0">
+                        <div class="flex flex-wrap items-center gap-1.5">
+                          ${q.resolved
+                            ? `<span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">Behoben</span>`
+                            : q.severity === 'warning'
+                            ? `<span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-red-500/20 text-red-600 dark:text-red-400">Macke / Störung</span>`
+                            : `<span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400">Eigenheit</span>`
+                          }
+                          <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400">${escapeHTML(q.category)}</span>
+                          ${q.tzNumber ? `<span class="font-mono text-[11px] text-rail-red font-semibold">${escapeHTML(q.tzNumber)}</span>` : ''}
+                        </div>
+                        <p class="text-sm font-medium ${q.resolved ? 'line-through text-slate-500' : 'text-slate-800 dark:text-slate-100'}">${escapeHTML(q.text)}</p>
+                      </div>
+
+                      <div class="flex items-center gap-1 shrink-0">
+                        <button type="button" onclick="toggleQuirkResolved('${escapeHTML(q.id)}')" title="${q.resolved ? 'Wieder öffnen' : 'Als behoben markieren'}"
+                          class="p-1.5 rounded-lg hover:bg-emerald-500/20 ${q.resolved ? 'text-emerald-500' : 'text-slate-400 hover:text-emerald-500'} transition">
+                          <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+                        </button>
+                        <button type="button" onclick="openQuirkModal('', '${escapeHTML(q.id)}')" title="Bearbeiten"
+                          class="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition">
+                          <i data-lucide="pencil" class="w-4 h-4"></i>
+                        </button>
+                        <button type="button" onclick="deleteQuirk('${escapeHTML(q.id)}')" title="Löschen"
+                          class="p-1.5 rounded-lg hover:bg-red-500/20 text-slate-400 hover:text-red-500 transition">
+                          <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            `}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderHistory() {
+      const q = document.getElementById('history-search').value.trim().toLowerCase();
+      const qTzKey = extractTzKey(q);
+      const seriesFilter = document.getElementById('history-series-filter').value;
+
+      const seriesSet = new Set(appState.shifts.map(s => s.series).filter(Boolean));
+      const selectEl = document.getElementById('history-series-filter');
+      const prevFilter = selectEl.value;
+      selectEl.innerHTML = `<option value="ALL">Alle Baureihen</option>` +
+        Array.from(seriesSet).sort().map(s => `<option value="${escapeHTML(s)}">${escapeHTML(s)}</option>`).join('');
+      if (Array.from(seriesSet).includes(prevFilter)) selectEl.value = prevFilter;
+
+      const sorted = [...appState.shifts].sort((a, b) => `${b.date} ${b.time}`.localeCompare(`${a.date} ${a.time}`));
+
+      const filtered = sorted.filter(s => {
+        if (seriesFilter !== 'ALL' && s.series !== seriesFilter) return false;
+        if (!q) return true;
+
+        const numStr = normalizeVehicleNumber(s.vehicleNumber).toLowerCase();
+        const tzStr = (s.tzNumber || '').toLowerCase();
+        const tzKey = extractTzKey(s.tzNumber);
+        const brStr = (s.series || '').toLowerCase();
+        const noteStr = (s.note || '').toLowerCase();
+        const quirksBlob = appState.quirks
+          .filter(item => doesMatchVehicle(item.vehicleNumber, item.tzNumber, s.vehicleNumber, s.tzNumber))
+          .map(item => `${item.text} ${item.category} ${item.tzNumber || ''}`.toLowerCase())
+          .join(' ');
+
+        return numStr.includes(q) ||
+          tzStr.includes(q) ||
+          Boolean(qTzKey && tzKey.includes(qTzKey)) ||
+          brStr.includes(q) ||
+          noteStr.includes(q) ||
+          quirksBlob.includes(q);
+      });
+
+      document.getElementById('history-count-badge').textContent = `${filtered.length} ${filtered.length === 1 ? 'Eintrag' : 'Einträge'}`;
+      const listEl = document.getElementById('full-history-list');
+
+      if (filtered.length === 0) {
+        listEl.innerHTML = `
+          <div class="text-center py-10 px-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-2">
+            <i data-lucide="search-x" class="w-8 h-8 text-slate-400 mx-auto"></i>
+            <p class="text-sm font-medium text-slate-500">Keine passenden Historien-Einträge gefunden.</p>
+          </div>
+        `;
+        return;
+      }
+
+      listEl.innerHTML = filtered.map(s => createHistoryCardHTML(s, true)).join('');
+    }
+
+    function renderAll() {
+      renderStats();
+      renderRecentShifts();
+      renderVehiclesDatabase();
+      renderHistory();
+      lucide.createIcons();
+    }
+
+    // ==================== FILTER & BACKUP AKTIONEN ====================
+    document.getElementById('vehicle-search').addEventListener('input', () => { renderVehiclesDatabase(); lucide.createIcons(); });
+    document.getElementById('vehicle-quirk-filter').addEventListener('change', () => { renderVehiclesDatabase(); lucide.createIcons(); });
+    document.getElementById('history-search').addEventListener('input', () => { renderHistory(); lucide.createIcons(); });
+    document.getElementById('history-series-filter').addEventListener('change', () => { renderHistory(); lucide.createIcons(); });
+
+    document.getElementById('btn-export-json').addEventListener('click', () => {
+      const payload = {
+        app: 'Tf-Fahrzeugbuch',
+        version: BACKUP_VERSION,
+        exportedAt: new Date().toISOString(),
+        data: appState
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const stamp = new Date().toISOString().split('T')[0];
+      a.href = url;
+      a.download = `tf-fahrzeugbuch-${stamp}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('JSON-Backup heruntergeladen.');
+    });
+
+    function applyImportedJsonString(jsonStr) {
+      try {
+        const parsed = JSON.parse(jsonStr);
+        const clean = sanitizeDataset(parsed);
+        const mode = document.querySelector('input[name="import-mode"]:checked')?.value || 'merge';
+
+        if (mode === 'replace') {
+          appState = clean;
+        } else {
+          const existingShiftIds = new Set(appState.shifts.map(s => s.id));
+          const existingQuirkIds = new Set(appState.quirks.map(q => q.id));
+
+          clean.shifts.forEach(s => {
+            const id = existingShiftIds.has(s.id) ? `${s.id}-imp-${Math.random().toString(36).slice(2, 6)}` : s.id;
+            appState.shifts.push({ ...s, id });
+          });
+
+          clean.quirks.forEach(q => {
+            const id = existingQuirkIds.has(q.id) ? `${q.id}-imp-${Math.random().toString(36).slice(2, 6)}` : q.id;
+            appState.quirks.push({ ...q, id });
+          });
+        }
+
+        saveState();
+        showToast(`Import (${mode === 'replace' ? 'Ersetzen' : 'Merge'}) erfolgreich: ${appState.shifts.length} Fahrten, ${appState.quirks.length} Notizen.`);
+      } catch (err) {
+        console.error(err);
+        showToast(`Import fehlgeschlagen: ${err.message}`, 'error');
+      }
+    }
+
+    document.getElementById('input-import-json-file').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const text = String(ev.target.result || '');
+        document.getElementById('import-json-textarea').value = text;
+        applyImportedJsonString(text);
+        e.target.value = '';
+      };
+      reader.readAsText(file);
+    });
+
+    document.getElementById('btn-import-json-text').addEventListener('click', () => {
+      const raw = document.getElementById('import-json-textarea').value.trim();
+      if (!raw) {
+        showToast('Bitte zuerst JSON-Text einfügen oder eine Datei wählen.', 'warning');
+        return;
+      }
+      applyImportedJsonString(raw);
+    });
+
+    document.getElementById('btn-load-demo').addEventListener('click', () => {
+      appState = getDemoData();
+      saveState();
+      showToast('Beispieldaten geladen.');
+    });
+
+    document.getElementById('btn-clear-all').addEventListener('click', () => {
+      document.getElementById('delete-confirm-box').classList.remove('hidden');
+    });
+
+    document.getElementById('btn-cancel-wipe').addEventListener('click', () => {
+      document.getElementById('delete-confirm-box').classList.add('hidden');
+    });
+
+    document.getElementById('btn-confirm-wipe').addEventListener('click', () => {
+      appState = { shifts: [], quirks: [] };
+      localStorage.setItem(STORAGE_KEY_INIT, 'true');
+      saveState();
+      document.getElementById('delete-confirm-box').classList.add('hidden');
+      livePreviewBox.classList.add('hidden');
+      showToast('Alle Daten wurden gelöscht.', 'warning');
+    });
+
+    // ==================== START ====================
+    // ==================== PWA: MANIFEST, SVG-ICON, SERVICE WORKER & INSTALL ====================
+    let deferredInstallPrompt = null;
+
+    function buildPwaSvgIconDataUrl() {
+      const svg = `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+          <defs>
+            <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#0f172a"/>
+              <stop offset="100%" stop-color="#1e293b"/>
+            </linearGradient>
+          </defs>
+          <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+          <rect x="28" y="28" width="456" height="456" rx="92" fill="none" stroke="#EC0016" stroke-width="10" stroke-opacity="0.65"/>
+          <!-- Triebzug-Front Silhouette -->
+          <path d="M148 118 C148 92 176 76 256 76 C336 76 364 92 364 118 L382 286 C384 314 364 338 334 338 L178 338 C148 338 128 314 130 286 Z" fill="#f8fafc"/>
+          <!-- Zierstreifen Verkehrsrot -->
+          <path d="M132 254 L380 254 L382 284 L130 284 Z" fill="#EC0016"/>
+          <!-- Frontscheibe Führerstand -->
+          <path d="M172 132 C172 118 192 110 256 110 C320 110 340 118 340 132 L348 202 L164 202 Z" fill="#0f172a"/>
+          <!-- Spitzenlichter -->
+          <circle cx="174" cy="306" r="14" fill="#fbbf24"/>
+          <circle cx="338" cy="306" r="14" fill="#fbbf24"/>
+          <circle cx="256" cy="94" r="9" fill="#fbbf24"/>
+          <!-- Schienen -->
+          <line x1="168" y1="354" x2="122" y2="432" stroke="#94a3b8" stroke-width="14" stroke-linecap="round"/>
+          <line x1="344" y1="354" x2="390" y2="432" stroke="#94a3b8" stroke-width="14" stroke-linecap="round"/>
+          <!-- Tz-Badge unten rechts -->
+          <rect x="292" y="362" width="164" height="84" rx="24" fill="#EC0016" stroke="#0f172a" stroke-width="8"/>
+          <text x="374" y="418" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-weight="800" font-size="46" fill="#ffffff">Tz</text>
+        </svg>
+      `.trim();
+      return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    }
+
+    function initDynamicPwaManifest() { /* Manifest liegt jetzt als echte Datei vor (manifest.webmanifest) */ }
+
+    async function registerEmbeddedServiceWorker() {
+      const isHttp = window.location.protocol === 'http:' || window.location.protocol === 'https:';
+      if (!isHttp || !('serviceWorker' in navigator)) {
+        return { supported: false, reason: window.location.protocol === 'file:' ? 'file' : 'unsupported' };
+      }
+      try {
+        await navigator.serviceWorker.register('sw.js');
+        return { supported: true, reason: 'registered' };
+      } catch (err) {
+        console.info('Service-Worker-Registrierung fehlgeschlagen:', err.message);
+        return { supported: false, reason: 'register_failed' };
+      }
+    }
+
+    function isAppRunningStandalone() {
+      return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    }
+
+    function updatePwaInstallUI() {
+      const badgeEl = document.getElementById('pwa-status-badge');
+      const descEl = document.getElementById('pwa-status-description');
+      const installBtn = document.getElementById('btn-pwa-install');
+      const bannerEl = document.getElementById('pwa-install-banner');
+      if (!badgeEl || !descEl || !installBtn) return;
+
+      const standalone = isAppRunningStandalone();
+      const isFileProtocol = window.location.protocol === 'file:';
+
+      if (standalone) {
+        badgeEl.textContent = 'Installiert (Vollbild)';
+        badgeEl.className = 'text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 shrink-0';
+        descEl.textContent = 'Die App läuft bereits im eigenständigen Vollbildmodus auf deinem Smartphone. Alle Fahrzeugdaten sind offline im lokalen Speicher gesichert.';
+        installBtn.disabled = true;
+        installBtn.innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4"></i><span>Bereits als App installiert</span>`;
+        if (bannerEl) bannerEl.classList.add('hidden');
+      } else if (deferredInstallPrompt) {
+        badgeEl.textContent = 'Bereit zur Installation';
+        badgeEl.className = 'text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 shrink-0';
+        descEl.textContent = 'Dein Browser unterstützt die direkte Ein-Klick-Installation als Progressive Web App inklusive Startbildschirm-Icon und Vollbildmodus.';
+        installBtn.disabled = false;
+        installBtn.innerHTML = `<i data-lucide="download-cloud" class="w-4 h-4"></i><span>Jetzt als App installieren</span>`;
+      } else if (isFileProtocol) {
+        badgeEl.textContent = 'Lokale Datei (file://)';
+        badgeEl.className = 'text-[11px] font-bold px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 shrink-0';
+        descEl.textContent = 'Du hast die Datei lokal geöffnet. Nutze im Browser-Menü „Zum Startbildschirm hinzufügen“, um ein App-Icon auf deinem Homescreen anzulegen – oder hoste die Datei über HTTPS (z. B. Nextcloud) für den direkten Installations-Dialog.';
+        installBtn.disabled = true;
+        installBtn.innerHTML = `<i data-lucide="smartphone" class="w-4 h-4"></i><span>Über Browser-Menü zum Startbildschirm hinzufügen</span>`;
+      } else {
+        badgeEl.textContent = 'Server / HTTPS aktiv';
+        badgeEl.className = 'text-[11px] font-bold px-2.5 py-1 rounded-full bg-sky-500/15 text-sky-600 dark:text-sky-400 shrink-0';
+        descEl.textContent = 'Die App wird über eine Web-Adresse geladen. Falls der Browser keinen automatischen Installations-Dialog anzeigt, kannst du sie jederzeit über das Browser-Menü zum Startbildschirm hinzufügen.';
+        installBtn.disabled = true;
+        installBtn.innerHTML = `<i data-lucide="smartphone" class="w-4 h-4"></i><span>Über Browser-Menü installieren</span>`;
+      }
+      lucide.createIcons();
+    }
+
+    async function triggerPwaInstallPrompt() {
+      if (!deferredInstallPrompt) {
+        showToast('Bitte im Browser-Menü „Zum Startbildschirm hinzufügen“ wählen.', 'warning');
+        return;
+      }
+      deferredInstallPrompt.prompt();
+      const choiceResult = await deferredInstallPrompt.userChoice;
+      if (choiceResult && choiceResult.outcome === 'accepted') {
+        showToast('Installation gestartet – das App-Icon erscheint auf deinem Startbildschirm!');
+      }
+      deferredInstallPrompt = null;
+      const bannerEl = document.getElementById('pwa-install-banner');
+      if (bannerEl) bannerEl.classList.add('hidden');
+      updatePwaInstallUI();
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      const bannerEl = document.getElementById('pwa-install-banner');
+      if (bannerEl && !isAppRunningStandalone()) {
+        bannerEl.classList.remove('hidden');
+      }
+      updatePwaInstallUI();
+    });
+
+    window.addEventListener('appinstalled', () => {
+      deferredInstallPrompt = null;
+      const bannerEl = document.getElementById('pwa-install-banner');
+      if (bannerEl) bannerEl.classList.add('hidden');
+      updatePwaInstallUI();
+      showToast('Tf-Fahrzeugbuch erfolgreich als App installiert!');
+    });
+
+    document.getElementById('btn-pwa-install').addEventListener('click', triggerPwaInstallPrompt);
+    document.getElementById('btn-banner-install').addEventListener('click', triggerPwaInstallPrompt);
+    document.getElementById('btn-banner-dismiss').addEventListener('click', () => {
+      document.getElementById('pwa-install-banner').classList.add('hidden');
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initTheme();
+      initDynamicPwaManifest();
+      registerEmbeddedServiceWorker();
+      setCurrentDateTime();
+      loadState();
+      renderAll();
+      updatePwaInstallUI();
+    });
+  </script>
+</body>
+</html>

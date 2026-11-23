@@ -1,0 +1,17 @@
+Tf-Fahrzeugbuch als PWA – Hochladen und Installieren
+
+1) Auf GitHub ein neues Repository anlegen (z. B. "tf-buch"), öffentlich.
+2) Den INHALT dieses Ordners hochladen (index.html, sw.js, manifest.webmanifest,
+   Ordner icons/, .nojekyll) – nicht den ZIP-Ordner selbst.
+3) Repository -> Settings -> Pages -> Source: "Deploy from a branch",
+   Branch: main, Ordner: / (root) -> Save.
+4) Nach 1-2 Minuten ist die App erreichbar unter:
+   https://<dein-name>.github.io/tf-buch/
+5) Auf dem Android-Smartphone in Chrome öffnen, einmal komplett laden lassen
+   (mit Internet), dann: Menü (drei Punkte) -> "App installieren".
+6) Danach funktioniert die App auch offline.
+
+Hinweise
+- Daten liegen im localStorage dieser URL. Immer von derselben Adresse installieren
+  und die Adresse später nicht ändern, sonst sind die Einträge "weg".
+- Neue Version ausliefern: in sw.js VERSION hochzählen (v1 -> v2).
