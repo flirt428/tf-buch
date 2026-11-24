@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Auftragsbuch</title>
+<title>Tf-Aufträge</title>
 <meta name="theme-color" content="#0f172a">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Aufträge">
+<meta name="apple-mobile-web-app-title" content="Tf-Aufträge">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -104,11 +104,34 @@ html.dark .pb{background:rgba(30,41,59,.95)}
 html.dark .pbtn{background:transparent;border:1.5px solid var(--ac)}
 .pbtn:active{transform:scale(.97);background:rgba(236,0,22,.18)}
 .pdx{background:none;border:0;color:#94a3b8;padding:8px;border-radius:12px;display:flex}.pdx svg{width:16px;height:16px}
+.hdc{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;border-bottom:1px solid var(--bd);padding-bottom:12px;margin-bottom:12px}
+.hdc .l{display:flex;align-items:center;gap:10px;min-width:0}.hdc h2{margin:0;font-size:16px;font-weight:700}.hdc p{margin:2px 0 0;font-size:12px;color:var(--mu)}
+.hdt{margin:0 0 12px;font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}.hdt svg{color:var(--mu);width:18px;height:18px}
+.it{width:36px;height:36px;border-radius:12px;background:rgba(236,0,22,.1);border:1px solid rgba(236,0,22,.25);display:flex;align-items:center;justify-content:center;color:var(--ac);flex:none}
+.pill{font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--sec);color:var(--mu);flex:none;text-align:center}
+.pill.ok{background:rgba(16,185,129,.15);color:var(--ok)}.pill.am{background:rgba(245,158,11,.15);color:var(--am)}.pill.sk{background:rgba(14,165,233,.15);color:#0284c7}
+html.dark .pill.sk{color:#38bdf8}
+.pd{font-size:13px;color:var(--mu);line-height:1.6;margin:0 0 12px}
+.gd{padding:14px;border-radius:12px;background:var(--in);border:1px solid var(--bd);font-size:12px;color:var(--mu)}
+.gd p{margin:0 0 6px;font-weight:700;color:var(--tx);display:flex;gap:6px;align-items:center}.gd svg{width:14px;height:14px;color:var(--ac)}.gd ul{margin:0;padding-left:16px}.gd li{margin-bottom:4px}
+.stt{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;padding:14px;border-radius:12px;background:var(--in);border:1px solid var(--bd);margin-bottom:12px}
+.stt b{display:block;font-size:20px;font-weight:800}.stt small{color:var(--mu);font-size:12px}
+.gr{display:grid;grid-template-columns:1fr;gap:12px}@media(min-width:640px){.gr{grid-template-columns:1fr 1fr}}
+.gr .btn{margin-top:0}label.btn{cursor:pointer}.btn:disabled{opacity:.5;cursor:not-allowed}
+.imp{border-top:1px solid var(--bd);margin-top:14px;padding-top:12px}
+.cap{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mu)}
+.rad{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;font-weight:500;margin:8px 0}.rad label{display:flex;gap:6px;align-items:center;cursor:pointer}.rad input{width:auto;accent-color:var(--ac)}
+#imp-ta{font:500 12px var(--fn);min-height:96px;margin-bottom:4px}
+.cf{padding:14px;border-radius:12px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.4);margin-top:12px}
+.cf p{margin:0 0 10px;font-size:12px;font-weight:500;color:#b91c1c}html.dark .cf p{color:#fca5a5}
+html:not(.dark) .chip{background:var(--ac);border-color:var(--ac);color:#fff}
+html:not(.dark) .chip.on{background:#8f000f;border-color:#8f000f;box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--ac)}
+html:not(.dark) .chips .chip.on::before{content:"✓ "}
 </style>
 </head>
 <body>
 <header class="hdr"><div class="in">
-  <div class="lg"><div class="tile"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3.1V7a4 4 0 0 0 8 0V3.1"/><path d="m9 15-1-1"/><path d="m15 15 1-1"/><path d="M9 19c-2.8 0-5-2.2-5-5v-4a8 8 0 0 1 16 0v4c0 2.8-2.2 5-5 5Z"/><path d="m8 19-2 3"/><path d="m16 19 2 3"/></svg></div><div><h1>Tf-Auftragsbuch</h1><p><i class="dot"></i>Lokal gespeichert</p></div></div>
+  <div class="lg"><div class="tile"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3.1V7a4 4 0 0 0 8 0V3.1"/><path d="m9 15-1-1"/><path d="m15 15 1-1"/><path d="M9 19c-2.8 0-5-2.2-5-5v-4a8 8 0 0 1 16 0v4c0 2.8-2.2 5-5 5Z"/><path d="m8 19-2 3"/><path d="m16 19 2 3"/></svg></div><div><h1>Tf-Aufträge</h1><p><i class="dot"></i>Lokal gespeichert</p></div></div>
   <div class="rt"><a class="ib" href="../" title="Zum Tf-Fahrzeugbuch">Tf-Buch</a>
     <button id="theme" class="ib" type="button" aria-label="Nachtschicht- und Tagmodus umschalten"><span class="sun"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2m-7.07-14.93 1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg></span><span class="moon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></span></button></div>
 </div></header>
@@ -123,12 +146,41 @@ html.dark .pbtn{background:transparent;border:1.5px solid var(--ac)}
   <section id="tab-liste" class="hidden"><h2 class="sh">Erfasste Aufträge</h2>
     <input id="q" data-t="n" inputmode="numeric" pattern="[0-9]*" placeholder="Suche nach Tz- oder Fahrzeugnummer" autocomplete="off" style="margin-bottom:12px">
     <div id="list"></div></section>
-  <section id="tab-backup" class="hidden"><div class="card">
-    <div class="ch"><h2><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>Backup &amp; Sicherung</h2></div>
-    <div class="mu" style="margin:0 0 6px;text-align:left">Alle Aufträge liegen nur auf diesem Gerät. Speichere gelegentlich ein Backup und lade es bei Bedarf wieder ein.</div>
-    <button class="btn" id="exp" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3m0 12-4-4m4 4 4-4"/><path d="M3 17v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2"/></svg>Backup speichern</button>
-    <button class="btn s" id="imp" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0-12-4 4m4-4 4 4"/><path d="M3 17v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2"/></svg>Backup laden</button>
-    <input type="file" id="file" accept="application/json" hidden></div></section>
+  <section id="tab-backup" class="hidden">
+    <div class="card">
+      <div class="hdc"><div class="l"><div class="it"><svg viewBox="0 0 24 24" aria-hidden="true"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg></div><div><h2>App auf Smartphone installieren (PWA)</h2><p>Homescreen-Icon, Vollbildmodus &amp; Offline-Cache</p></div></div>
+        <span id="pwa-status-badge" class="pill">Status wird geprüft…</span></div>
+      <p id="pwa-status-description" class="pd"></p>
+      <button type="button" id="btn-pwa-install" class="btn" style="margin-top:0"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 13v8l-4-4"/><path d="m12 21 4-4"/><path d="M4.393 15.269A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.436 8.284"/></svg><span>Jetzt als App installieren</span></button>
+      <div class="gd" style="margin-top:12px"><p><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>Manuelle Installation auf dem Smartphone:</p>
+        <ul><li><b>Android (Chrome):</b> Oben rechts auf <b>⋮</b> tippen → <b>„Zum Startbildschirm hinzufügen“</b> oder <b>„App installieren“</b> wählen.</li>
+        <li><b>iPhone / iPad (Safari):</b> Unten auf das <b>Teilen-Symbol</b> tippen → <b>„Zum Home-Bildschirm“</b> auswählen.</li></ul></div>
+    </div>
+    <div class="card">
+      <div class="hdc" style="align-items:center"><div class="l"><span style="color:var(--ac);display:flex"><svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg></span><div><h2>Offline-Speicher &amp; JSON-Backup</h2><p>Alle Daten liegen lokal im Browser – auch ohne Netz in Tunneln oder Funklöchern verfügbar.</p></div></div></div>
+      <div id="bk-stats" class="stt"></div>
+      <div class="gr">
+        <button type="button" id="bk-exp" class="btn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3m0 12-4-4m4 4 4-4"/><path d="M3 17v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2"/></svg>JSON-Backup exportieren</button>
+        <label class="btn s"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0-12-4 4m4-4 4 4"/><path d="M3 17v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2"/></svg>JSON-Datei wählen<input type="file" id="bk-file" accept=".json,application/json" hidden></label>
+      </div>
+      <div class="imp">
+        <label for="imp-ta" class="cap">JSON-Backup direkt einfügen / prüfen</label>
+        <div class="rad"><label><input type="radio" name="import-mode" value="merge" checked><span>Zusammenführen (Merge)</span></label>
+          <label><input type="radio" name="import-mode" value="replace"><span>Bestehendes ersetzen</span></label></div>
+        <textarea id="imp-ta" rows="4" placeholder='{"app":"Tf-Aufträge","version":1,"data":{"orders":[...]}}'></textarea>
+        <button type="button" id="bk-imp" class="btn s"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v4"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="m3 15 2 2 4-4"/></svg>Eingefügtes JSON importieren</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3 class="hdt"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M2 14h4M10 8h4M18 16h4"/></svg>Beispieldaten &amp; Zurücksetzen</h3>
+      <div class="gr">
+        <button type="button" id="bk-demo" class="btn s"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>Beispieldaten laden</button>
+        <button type="button" id="bk-clear" class="btn s"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>Alle Daten löschen</button>
+      </div>
+      <div id="bk-cf" class="cf hidden"><p>Sicherheitsabfrage: Alle erfassten Aufträge unwiderruflich löschen?</p>
+        <div class="row" style="margin-top:0"><button type="button" id="bk-yes" class="btn" style="margin-top:0">Ja, unwiderruflich löschen</button><button type="button" id="bk-no" class="btn s" style="margin-top:0">Abbrechen</button></div></div>
+    </div>
+  </section>
 </main>
 <nav><div class="in">
   <button class="nb on" type="button" data-tab="erfassen"><svg viewBox="0 0 24 24" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M8 12h8M12 8v8"/></svg><span>Erfassen</span></button>
@@ -409,7 +461,7 @@ function lines(e){const o=[],w=f=>f.weck?` · <span class="wk">Weck ${fmtW(f.wec
   if(e.on.vo)o.push(['vo',`<b>Vordienst</b> für ${esc(e.vo.zug||'–')} · Gl ${esc(e.vo.g||'–')} ${e.vo.typ?`· ${e.vo.typ}`:''}`]);
   const ord=['vo','ab','um','zu'];return o.sort((a,b)=>ord.indexOf(a[0])-ord.indexOf(b[0]))}
 const plain=e=>`${[e.veh,e.tz&&'Tz '+e.tz].filter(Boolean).join(' · ')||'–'} (${fmtD(e.dt)})\n`+lines(e).map(l=>'• '+l[1].replace(/<[^>]+>/g,'').replace(/&gt;/g,'>').replace(/&amp;/g,'&')).join('\n')+(e.note?'\n'+e.note:'');
-function list(){const q=$('#q').value,r=db.filter(e=>!q||(e.tz||'').includes(q)||(e.veh||'').replace(/\D/g,'').includes(q));
+function list(){stats();const q=$('#q').value,r=db.filter(e=>!q||(e.tz||'').includes(q)||(e.veh||'').replace(/\D/g,'').includes(q));
   $('#list').innerHTML=r.length?r.map(e=>`<div class="card"><div class="hd"><span>${esc(e.veh||'')}${e.veh&&e.tz?' · ':''}${e.tz?'Tz '+esc(e.tz):(e.veh?'':'–')}</span><small>${fmtD(e.dt)}</small></div>${e.br?`<div class="mu" style="text-align:left;margin:2px 0 0;font-size:12px">${esc(e.br)}</div>`:''}
   ${lines(e).map(l=>`<div class="ln" style="--c:${COL[l[0]]}">${l[1]}</div>`).join('')||'<div class="mu">Keine Blöcke gewählt</div>'}
   ${e.note?`<div class="ln" style="--c:var(--bd);color:var(--mu)">${esc(e.note)}</div>`:''}
@@ -442,23 +494,58 @@ document.addEventListener('click',e=>{if(!e.target.closest('.vc1')){const a=$('#
   else if(D.copy){const t=plain(db.find(x=>x.id==D.copy));if(navigator.share)navigator.share({text:t}).catch(()=>{});else navigator.clipboard&&navigator.clipboard.writeText(t)}
   else if(D.del){if(delArm==D.del){db=db.filter(x=>x.id!=D.del);save();delArm=null}else delArm=D.del;list()}});
 $('#q').addEventListener('input',e=>{e.target.value=e.target.value.replace(/\D/g,'');list()});
-$('#exp').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(db)],{type:'application/json'}));a.download='auftragsbuch-backup-'+now().slice(0,10)+'.json';a.click()};
-$('#imp').onclick=()=>$('#file').click();
-$('#file').onchange=async e=>{try{const j=JSON.parse(await e.target.files[0].text());if(Array.isArray(j)){const ids=new Set(db.map(x=>x.id));db=db.concat(j.filter(x=>x&&x.id&&!ids.has(x.id))).sort((a,b)=>b.dt>a.dt?1:-1);save();list()}}catch(err){}};
+
+/* ---- Backup, Beispieldaten, Zurücksetzen (wie im Tf-Fahrzeugbuch) ---- */
+function stats(){const el=$('#bk-stats');if(!el)return;
+  const veh=new Set(db.map(e=>e.tz||e.veh).filter(Boolean)).size,blk=db.reduce((n,e)=>n+Object.values(e.on||{}).filter(Boolean).length,0);
+  el.innerHTML=`<div><b>${db.length}</b><small>Aufträge</small></div><div><b>${veh}</b><small>Fahrzeuge</small></div><div><b style="color:var(--am)">${blk}</b><small>Blöcke</small></div>`}
+function cleanOrders(j){const arr=Array.isArray(j)?j:(j&&j.data&&Array.isArray(j.data.orders)?j.data.orders:(j&&Array.isArray(j.orders)?j.orders:null));
+  if(!arr)throw new Error('Keine Aufträge im JSON gefunden.');
+  return arr.filter(x=>x&&typeof x==='object').map(x=>{const b=blank(x.tz),e={...b,...x,id:String(x.id||b.id+Math.random().toString(36).slice(2,5))};
+    e.on={...b.on,...x.on};['ab','um','vo'].forEach(k=>e[k]={...b[k],...x[k]});e.zu={...b.zu,...x.zu};return e})}
+function applyImport(str){try{const clean=cleanOrders(JSON.parse(str)),mode=(document.querySelector('input[name="import-mode"]:checked')||{}).value||'merge';
+    if(mode==='replace')db=clean;
+    else{const ids=new Set(db.map(x=>x.id));clean.forEach(x=>db.push(ids.has(x.id)?{...x,id:x.id+'-imp-'+Math.random().toString(36).slice(2,6)}:x));db.sort((a,b)=>b.dt>a.dt?1:-1)}
+    save();list();toast(`Import (${mode==='replace'?'Ersetzen':'Merge'}) erfolgreich: ${db.length} Aufträge.`)}
+  catch(err){toast('Import fehlgeschlagen: '+err.message,'error')}}
+const iso=h=>{const t=new Date(Date.now()-h*36e5);return `${t.getFullYear()}-${pad(t.getMonth()+1)}-${pad(t.getDate())}T${pad(t.getHours())}:${pad(t.getMinutes())}`};
+function demo(){const mk=o=>{const e=blank(o.tz);e.id='demo-'+o.k;e.dt=iso(o.h);e.veh=o.veh;e.br=detectSeriesFromNumber(o.veh,'Tz '+o.tz)||'';e.note=o.note||'';
+    Object.assign(e.on,o.on);['ab','um','vo'].forEach(k=>Object.assign(e[k],o[k]||{}));Object.assign(e.zu,o.zu||{});return e};
+  return [
+    mk({k:1,h:1,veh:'407 007',tz:'707',on:{vo:1},vo:{zug:'598',tz:'707',g:'8',typ:'FGM'},note:'Beispiel Vordienst'}),
+    mk({k:2,h:3,veh:'408 007',tz:'8007',on:{ab:1},ab:{zug:'1021',tz:'8007',gn:'12',weck:'04:45'},note:'Beispiel Abdienst'}),
+    mk({k:3,h:5,veh:'412 005',tz:'9005',on:{um:1},um:{zug:'2107',tz:'9005',gv:'4',gn:'7',typ:'FF',weck:'05:30'},note:'Beispiel Umstellen'}),
+    mk({k:4,h:26,veh:'407 012',tz:'712',on:{zu:1},zu:{zug:'2561',von:'FFAB',nach:'FF',rueck:{zug:'2562',von:'FF',nach:'FFAB'}},note:'Beispiel Zufahrt mit Rückfahrt'})]}
+$('#bk-exp').onclick=()=>{const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify({app:'Tf-Aufträge',version:1,exportedAt:new Date().toISOString(),data:{orders:db}},null,2)],{type:'application/json'}));
+  a.download='tf-auftraege-'+now().slice(0,10)+'.json';document.body.appendChild(a);a.click();document.body.removeChild(a);toast('JSON-Backup heruntergeladen.')};
+$('#bk-file').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=ev=>{const t=String(ev.target.result||'');$('#imp-ta').value=t;applyImport(t);e.target.value=''};r.readAsText(f)};
+$('#bk-imp').onclick=()=>{const raw=$('#imp-ta').value.trim();if(!raw){toast('Bitte zuerst JSON-Text einfügen oder eine Datei wählen.','warning');return}applyImport(raw)};
+$('#bk-demo').onclick=()=>{db=demo();save();list();toast('Beispieldaten geladen.')};
+$('#bk-clear').onclick=()=>$('#bk-cf').classList.remove('hidden');
+$('#bk-no').onclick=()=>$('#bk-cf').classList.add('hidden');
+$('#bk-yes').onclick=()=>{db=[];save();list();$('#bk-cf').classList.add('hidden');toast('Alle Daten wurden gelöscht.','warning')};
 const tab=n=>{['erfassen','liste','backup'].forEach(t=>{$('#tab-'+t).classList.toggle('hidden',t!=n);document.querySelector(`[data-tab="${t}"]`).classList.toggle('on',t==n)});scrollTo(0,0)};
-let tt;const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2200)};
+let tt;const toast=(m,k)=>{const t=$('#toast');t.textContent=m;t.style.background=k=='error'?'#dc2626':k=='warning'?'#d97706':'';t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2200)};
 const THEME='tf_fahrzeugbuch_theme_v1',root=document.documentElement;
 if(st.get(THEME)==='light')root.classList.remove('dark');
 $('#theme').onclick=()=>{root.classList.toggle('dark');st.set(THEME,root.classList.contains('dark')?'dark':'light')};
 let deferredInstall=null;const standalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
 const banner=on=>$('#pwa-banner').classList.toggle('hidden',!on);
-async function doInstall(){if(!deferredInstall){toast('Bitte im Browser-Menü „Zum Startbildschirm hinzufügen“ wählen.');return}
+function upd(){const b=$('#pwa-status-badge'),d2=$('#pwa-status-description'),btn=$('#btn-pwa-install');if(!b)return;
+  const set=(c,t,desc,dis,lab)=>{b.className='pill '+c;b.textContent=t;d2.textContent=desc;btn.disabled=dis;btn.querySelector('span').textContent=lab};
+  if(standalone())set('ok','Installiert (Vollbild)','Die App läuft bereits im eigenständigen Vollbildmodus auf deinem Smartphone. Alle Aufträge sind offline im lokalen Speicher gesichert.',true,'Bereits als App installiert');
+  else if(deferredInstall)set('ok','Bereit zur Installation','Dein Browser unterstützt die direkte Ein-Klick-Installation als Progressive Web App inklusive Startbildschirm-Icon und Vollbildmodus.',false,'Jetzt als App installieren');
+  else if(location.protocol==='file:')set('am','Lokale Datei (file://)','Du hast die Datei lokal geöffnet. Nutze im Browser-Menü „Zum Startbildschirm hinzufügen“, um ein App-Icon auf deinem Homescreen anzulegen – oder hoste die Datei auf einem HTTPS-Server für die volle Offline-Installation.',true,'Über Browser-Menü zum Startbildschirm hinzufügen');
+  else set('sk','Server / HTTPS aktiv','Die App wird über eine Web-Adresse geladen. Falls der Browser keinen automatischen Installations-Dialog anzeigt, kannst du sie jederzeit über das Browser-Menü zum Startbildschirm hinzufügen.',true,'Über Browser-Menü installieren')}
+async function doInstall(){if(!deferredInstall){toast('Bitte im Browser-Menü „Zum Startbildschirm hinzufügen“ wählen.','warning');return}
   deferredInstall.prompt();const r=await deferredInstall.userChoice;
   if(r&&r.outcome==='accepted')toast('Installation gestartet – das App-Icon erscheint auf deinem Startbildschirm!');
-  deferredInstall=null;banner(false)}
-addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e;if(!standalone())banner(true)});
-addEventListener('appinstalled',()=>{deferredInstall=null;banner(false);toast('Tf-Auftragsbuch erfolgreich als App installiert!')});
-$('#pb-i').onclick=doInstall;$('#pb-x').onclick=()=>banner(false);
+  deferredInstall=null;banner(false);upd()}
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e;if(!standalone())banner(true);upd()});
+addEventListener('appinstalled',()=>{deferredInstall=null;banner(false);upd();toast('Tf-Aufträge erfolgreich als App installiert!')});
+$('#pb-i').onclick=doInstall;$('#pb-x').onclick=()=>banner(false);$('#btn-pwa-install').onclick=doInstall;upd();
 render();list();
 if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol))navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
