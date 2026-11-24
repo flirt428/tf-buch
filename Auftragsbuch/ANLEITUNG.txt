@@ -1,0 +1,8 @@
+Tf-Auftragsbuch als zweite PWA
+Variante A (empfohlen): im bestehenden Repo einen Ordner "auftragsbuch" anlegen
+ (Add file -> Upload files, Dateien per Drag&Drop mit Ordnername) und den Inhalt dieses ZIPs
+ dort hineinlegen. Adresse dann: https://<name>.github.io/<repo>/auftragsbuch/
+Variante B: eigenes neues öffentliches Repo, Pages wie beim Tf-Buch aktivieren.
+Beide Apps auf derselben github.io-Domain: das Auftragsbuch kann dann die Fahrzeuge
+aus dem Tf-Fahrzeugbuch für den automatischen Abgleich nutzen.
+Neue Version ausliefern: in sw.js VERSION hochzählen.

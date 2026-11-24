@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="de" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Auftragsbuch</title>
+<meta name="theme-color" content="#0f172a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Aufträge">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f1f5f9;--card:#fff;--tx:#0f172a;--mu:#64748b;--bd:#e2e8f0;--ibd:#cbd5e1;--in:#f8fafc;--sec:rgba(226,232,240,.8);--ac:#EC0016;--acd:#C20012;--am:#b45309;--ok:#059669;--hb:rgba(255,255,255,.92);color-scheme:light}
+html.dark{--bg:#020617;--card:#0f172a;--tx:#f1f5f9;--mu:#94a3b8;--bd:#1e293b;--ibd:#334155;--in:#020617;--sec:#1e293b;--am:#fcd34d;--ok:#34d399;--hb:rgba(15,23,42,.95);color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.4 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overscroll-behavior-y:contain}
+::selection{background:var(--ac);color:#fff}
+svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.hidden{display:none!important}
+.hdr{position:sticky;top:0;z-index:30;background:var(--hb);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--bd);padding:12px 16px}
+.in,main{max-width:672px;margin-inline:auto}
+.hdr .in{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.lg{display:flex;align-items:center;gap:10px;min-width:0}
+.tile{flex:none;width:40px;height:40px;border-radius:12px;background:var(--ac);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 15px -3px rgba(220,38,38,.2)}
+h1{margin:0;font-size:16px;font-weight:700;line-height:1.2;letter-spacing:-.01em;white-space:nowrap}
+.lg p{margin:2px 0 0;font-size:12px;color:var(--mu);display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dot{width:8px;height:8px;border-radius:50%;background:#10b981;flex:none}
+.rt{display:flex;gap:8px;flex:none}
+.ib{display:flex;align-items:center;gap:6px;padding:10px;border-radius:12px;background:var(--sec);color:var(--tx);border:1px solid var(--ibd);font:600 13px Inter,system-ui,sans-serif;text-decoration:none}
+a.ib{background:var(--ac);border-color:var(--ac);color:#fff}
+.sun{display:none;color:#fbbf24}html.dark .sun{display:block}html.dark .moon{display:none}
+main{padding:16px 16px 112px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:16px;margin-bottom:12px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.blk{border-left:5px solid var(--c,var(--bd))}
+.blk>h3{margin:0 0 10px;font-size:15px;font-weight:700;color:var(--c)}
+.ch{display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid var(--bd);padding-bottom:12px;margin-bottom:12px}
+.ch h2{margin:0;font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}.ch h2 svg{color:var(--ac)}
+.bdg{font-size:11px;font-weight:500;padding:4px 10px;border-radius:999px;background:var(--sec);color:var(--mu)}
+.sh{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--mu);margin:4px 4px 10px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.f{display:block;margin-bottom:12px}.f>span{display:block;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--mu);margin:0 0 6px}
+input,textarea{width:100%;font:700 18px "JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;padding:12px 14px;border-radius:12px;border:1px solid var(--ibd);background:var(--in);color:var(--tx);outline:none;transition:border-color .15s,box-shadow .15s}
+input[data-t=c]{text-transform:uppercase}
+input:focus,textarea:focus{border-color:var(--ac);box-shadow:0 0 0 2px rgba(236,0,22,.2)}
+input[type=datetime-local],input[type=time]{font:500 16px Inter,system-ui,sans-serif;min-height:48px}
+textarea{font:500 15px Inter,system-ui,sans-serif;min-height:48px;resize:vertical}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 10px}
+.chip{flex:1 1 auto;min-width:44%;padding:12px 10px;border-radius:12px;border:1.5px solid rgba(236,0,22,.55);background:transparent;color:var(--tx);font:600 14px Inter,system-ui,sans-serif;text-align:center;transition:transform .1s}
+.chip.on{background:var(--ac);border-color:var(--ac);color:#fff}
+.seg{display:flex;gap:8px;margin-bottom:4px}.seg .chip{min-width:0;flex:1}
+.seg .chip.on{background:var(--ac);border-color:var(--ac);color:#fff}
+button{font:inherit;cursor:pointer}
+.btn{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:14px 20px;border:0;border-radius:12px;background:var(--ac);color:#fff;font-weight:700;font-size:16px;margin-top:8px;box-shadow:0 10px 15px -3px rgba(220,38,38,.25);transition:transform .1s,background .15s}
+.btn:hover{background:var(--acd)}
+.btn.s{box-shadow:none;font-size:14px;font-weight:600}
+.btn.a{box-shadow:none;font-size:14px;font-weight:600}
+.btn:active,.chip:active,.ib:active{transform:scale(.97)}
+.mini{border:0;background:var(--ac);color:#fff;border-radius:12px;padding:9px 11px;font-size:13px;font-weight:600}
+.vg{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:8px}
+@media(min-width:640px){.vg{grid-template-columns:5fr 3fr 4fr}}
+.vc1{position:relative}
+.lh{display:flex;align-items:center;justify-content:space-between;gap:4px;margin-bottom:6px;min-height:18px}.lh label{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--mu)}
+.auto{font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:rgba(16,185,129,.15);color:var(--ok)}
+.rel{position:relative}.x{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:0;color:var(--mu);padding:4px;display:flex}
+.x svg{width:16px;height:16px}
+.ac{position:absolute;left:0;right:0;top:100%;margin-top:4px;z-index:20;background:var(--card);border:1px solid var(--bd);border-radius:12px;box-shadow:0 20px 25px -5px rgba(0,0,0,.3);max-height:240px;overflow-y:auto}
+.ac button{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--bd);padding:10px 12px;color:var(--tx);font-size:14px}
+.ac button:last-child{border-bottom:0}.ac b,.mono{font-family:"JetBrains Mono",ui-monospace,monospace}.ac i{font-style:normal;color:var(--ac);font-weight:700;margin-left:8px;font-family:"JetBrains Mono",ui-monospace,monospace}.ac small{display:block;color:var(--mu);font-size:12px}
+.hp{display:flex;gap:6px;align-items:flex-start;font-size:11px;color:var(--mu);margin:0 0 12px}.hp svg{width:14px;height:14px;color:var(--ac);margin-top:2px}
+.sug{display:flex;flex-wrap:wrap;gap:6px;margin:-4px 0 8px}
+.sug button{border:1px dashed var(--ac);background:none;color:var(--tx);border-radius:10px;padding:6px 10px;font:600 14px "JetBrains Mono",ui-monospace,monospace}
+.hint{font-size:13px;color:var(--ok);margin:-4px 2px 10px;font-weight:600}
+.rueck{background:var(--in);border:1px dashed var(--ibd);border-radius:12px;padding:12px;margin-top:8px}
+.row{display:flex;gap:8px;margin-top:10px}.row>*{flex:1}
+.hd{display:flex;justify-content:space-between;gap:8px;font-weight:700}.hd small{color:var(--mu);font-weight:500}
+.ln{margin:6px 0 0;font-size:14px;padding-left:10px;border-left:3px solid var(--c,var(--bd))}
+.mu{color:var(--mu);font-size:13px;text-align:center;margin:14px}
+.wk{color:var(--am);font-weight:700}
+nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--hb);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--bd);padding-bottom:env(safe-area-inset-bottom,0px)}
+nav .in{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:6px 8px}
+.nb{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;border:0;border-radius:12px;background:none;color:var(--mu);font:500 11px Inter,system-ui,sans-serif}
+.nb.on{color:var(--ac);background:rgba(236,0,22,.1);font-weight:600}
+#toast{position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:60;background:#059669;color:#fff;border:1px solid rgba(52,211,153,.3);padding:10px 16px;border-radius:12px;font:600 14px Inter,system-ui,sans-serif;box-shadow:0 10px 25px rgba(0,0,0,.3);opacity:0;pointer-events:none;transition:opacity .2s}
+#toast.on{opacity:1}
+</style>
+</head>
+<body>
+<header class="hdr"><div class="in">
+  <div class="lg"><div class="tile"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3.1V7a4 4 0 0 0 8 0V3.1"/><path d="m9 15-1-1"/><path d="m15 15 1-1"/><path d="M9 19c-2.8 0-5-2.2-5-5v-4a8 8 0 0 1 16 0v4c0 2.8-2.2 5-5 5Z"/><path d="m8 19-2 3"/><path d="m16 19 2 3"/></svg></div><div><h1>Tf-Auftragsbuch</h1><p><i class="dot"></i>Lokal gespeichert</p></div></div>
+  <div class="rt"><a class="ib" href="../" title="Zum Tf-Fahrzeugbuch">Tf-Buch</a>
+    <button id="theme" class="ib" type="button" aria-label="Nachtschicht- und Tagmodus umschalten"><span class="sun"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2m-7.07-14.93 1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg></span><span class="moon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></span></button></div>
+</div></header>
+<main>
+  <section id="tab-erfassen"><div id="form"></div></section>
+  <section id="tab-liste" class="hidden"><h2 class="sh">Erfasste Aufträge</h2>
+    <input id="q" data-t="n" inputmode="numeric" pattern="[0-9]*" placeholder="Suche nach Tz- oder Fahrzeugnummer" autocomplete="off" style="margin-bottom:12px">
+    <div id="list"></div></section>
+  <section id="tab-backup" class="hidden"><div class="card">
+    <div class="ch"><h2><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>Backup &amp; Sicherung</h2></div>
+    <div class="mu" style="margin:0 0 6px;text-align:left">Alle Aufträge liegen nur auf diesem Gerät. Speichere gelegentlich ein Backup und lade es bei Bedarf wieder ein.</div>
+    <button class="btn" id="exp" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3m0 12-4-4m4 4 4-4"/><path d="M3 17v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2"/></svg>Backup speichern</button>
+    <button class="btn s" id="imp" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0-12-4 4m4-4 4 4"/><path d="M3 17v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2"/></svg>Backup laden</button>
+    <input type="file" id="file" accept="application/json" hidden></div></section>
+</main>
+<nav><div class="in">
+  <button class="nb on" type="button" data-tab="erfassen"><svg viewBox="0 0 24 24" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M8 12h8M12 8v8"/></svg><span>Erfassen</span></button>
+  <button class="nb" type="button" data-tab="liste"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg><span>Aufträge</span></button>
+  <button class="nb" type="button" data-tab="backup"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg><span>Backup</span></button>
+</div></nav>
+<div id="toast"></div>
+
+<script>
+const KEY='auftragsbuch_data_v1', TFKEY='tf_fahrzeugbuch_data_v2', mem={};
+const st={get(k){try{return localStorage.getItem(k)}catch(e){return mem[k]||null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){mem[k]=v}}};
+let db=[];try{db=JSON.parse(st.get(KEY)||'[]')}catch(e){}
+const save=()=>st.set(KEY,JSON.stringify(db));
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+const now=()=>{const t=new Date();return `${t.getFullYear()}-${pad(t.getMonth()+1)}-${pad(t.getDate())}T${pad(t.getHours())}:${pad(t.getMinutes())}`};
+const fahrt=()=>({zug:'',von:'',nach:''});
+const blank=tz=>({id:Date.now().toString(36),dt:now(),veh:'',br:'',tz:tz||'',note:'',on:{ab:0,um:0,zu:0,vo:0},
+  ab:{zug:'',tz:tz||'',gn:'',weck:''},um:{zug:'',tz:tz||'',gv:'',gn:'',typ:'',weck:''},zu:{...fahrt(),rueck:null},vo:{zug:'',tz:tz||'',g:'',typ:''}});
+let d=blank(), editing=null, delArm=null;
+const COL={ab:'#0ea5e9',um:'#f59e0b',zu:'#EC0016',vo:'#10b981'},COLT={um:'#020617'};
+const IC={x:'<svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>',swap:'<svg viewBox="0 0 24 24"><path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/></svg>',chk:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>',train:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3.1V7a4 4 0 0 0 8 0V3.1"/><path d="m9 15-1-1"/><path d="m15 15 1-1"/><path d="M9 19c-2.8 0-5-2.2-5-5v-4a8 8 0 0 1 16 0v4c0 2.8-2.2 5-5 5Z"/><path d="m8 19-2 3"/><path d="m16 19 2 3"/></svg>'};
+const NAME={vo:'Vordienst',ab:'Abdienst',um:'Umstellen',zu:'Zufahrt'};
+const fmtW=w=>w||'';
+const fmtD=s=>{const t=new Date(s);return isNaN(t)?s:`${pad(t.getDate())}.${pad(t.getMonth()+1)}. ${pad(t.getHours())}:${pad(t.getMinutes())}`};
+const get=(o,k)=>k.split('.').reduce((a,p)=>a&&a[p],o);
+const set=(o,k,v)=>{const p=k.split('.'),l=p.pop();p.reduce((a,x)=>a[x],o)[l]=v};
+
+    const SERIES_RULES = {
+      '401': 'BR 401 (ICE 1)',
+      '402': 'BR 402 (ICE 2)',
+      '403': 'BR 403 (ICE 3)',
+      '406': 'BR 406 (ICE 3M)',
+      '407': 'BR 407 (Velaro D)',
+      '408': 'BR 408 (ICE 3neo)',
+      '411': 'BR 411 (ICE-T)',
+      '412': 'BR 412 (ICE 4)',
+      '415': 'BR 415 (ICE-T)',
+      '101': 'BR 101',
+      '111': 'BR 111',
+      '146': 'BR 146',
+      '147': 'BR 147',
+      '185': 'BR 185',
+      '193': 'BR 193 (Vectron)',
+      '612': 'BR 612 (RegioSwinger)',
+      '642': 'BR 642 (Desiro Classic)'
+    };
+
+    function normalizeVehicleNumber(raw) {
+      if (!raw) return '';
+      const cleaned = String(raw).trim().toUpperCase().replace(/\s+/g, ' ');
+      // Behandle 4-stellige Baureihen-Notation wie "0812 005" -> "412 005" bzw. EVN
+      const br412Alt = cleaned.match(/\b0812\s*(\d{3})\b/);
+      if (br412Alt) {
+        return `412 ${br412Alt[1]}`;
+      }
+      const evnMatch = cleaned.match(/\b(\d{3})\s*(\d{3,4})(?:-[0-9X])?\b/);
+      if (evnMatch) {
+        return `${evnMatch[1]} ${evnMatch[2]}`;
+      }
+      const simpleMatch = cleaned.match(/^(\d{3})\s*(\d{3,4})$/);
+      if (simpleMatch) {
+        return `${simpleMatch[1]} ${simpleMatch[2]}`;
+      }
+      return cleaned;
+    }
+
+    function normalizeTzNumber(rawTz) {
+      if (!rawTz) return '';
+      const trimmed = String(rawTz).trim();
+      if (!trimmed) return '';
+      const m = trimmed.match(/^(?:tz[\s\-]*)?([a-z0-9]+)$/i);
+      if (m) {
+        return `Tz ${m[1].toUpperCase()}`;
+      }
+      return trimmed.replace(/^tz\s*/i, 'Tz ');
+    }
+
+    function extractTzKey(tzStr) {
+      if (!tzStr) return '';
+      return String(tzStr).trim().toLowerCase().replace(/^tz[\s\-]*/, '');
+    }
+
+    /**
+     * Richtung 1: Leitet aus einer Fahrzeugnummer die Tz-Nummer ab.
+     * Unterstützt Endtriebwagen 0xx sowie 5xx (z. B. 407 007 / 407 507 -> Tz 707).
+     */
+    function suggestTzNumber(vehicleNum) {
+      const norm = normalizeVehicleNumber(vehicleNum);
+      const match = norm.match(/^(\d{3})\s+(\d{3,4})$/);
+      if (!match) return '';
+
+      const prefix = match[1];
+      const rawUnit = parseInt(match[2], 10);
+      if (Number.isNaN(rawUnit)) return '';
+
+      // Bei Endtriebwagen 501-599 (z. B. 407 507, 403 515, 408 507, 411 515) auf Ordnungsnummer 001-099 normieren
+      const unitTwoDigit = (rawUnit >= 501 && rawUnit <= 599) ? (rawUnit - 500) : rawUnit;
+
+      if (prefix === '407') {
+        if (unitTwoDigit >= 1 && unitTwoDigit <= 99) return `Tz ${700 + unitTwoDigit}`;
+        if (rawUnit >= 700 && rawUnit <= 799) return `Tz ${rawUnit}`;
+      }
+      if (prefix === '408') {
+        if (unitTwoDigit >= 1 && unitTwoDigit <= 99) return `Tz ${8000 + unitTwoDigit}`;
+        if (rawUnit >= 8001 && rawUnit <= 8099) return `Tz ${rawUnit}`;
+      }
+      if (prefix === '403') {
+        if (unitTwoDigit >= 1 && unitTwoDigit <= 99) return `Tz ${300 + unitTwoDigit}`;
+      }
+      if (prefix === '406') {
+        if (unitTwoDigit >= 1 && unitTwoDigit <= 99) return `Tz ${4600 + unitTwoDigit}`;
+      }
+      if (prefix === '401') {
+        if (unitTwoDigit >= 1 && unitTwoDigit <= 99) return `Tz ${100 + unitTwoDigit}`;
+      }
+      if (prefix === '402') {
+        if (unitTwoDigit >= 1 && unitTwoDigit <= 99) return `Tz ${200 + unitTwoDigit}`;
+      }
+      if (prefix === '411') {
+        if (unitTwoDigit >= 1 && unitTwoDigit <= 99) return `Tz ${1100 + unitTwoDigit}`;
+      }
+      if (prefix === '415') {
+        if (unitTwoDigit >= 1 && unitTwoDigit <= 99) return `Tz ${1500 + unitTwoDigit}`;
+      }
+      if (prefix === '412') {
+        if (rawUnit >= 1 && rawUnit <= 499) return `Tz ${9000 + rawUnit}`;
+        if (rawUnit >= 9001 && rawUnit <= 9499) return `Tz ${rawUnit}`;
+      }
+
+      return `Tz ${rawUnit}`;
+    }
+
+    /**
+     * Richtung 2: Leitet aus einer Tz-Nummer (z. B. "707", "Tz 707", "Tz 8007", "Tz 9005")
+     * die Stamm-Fahrzeugnummer (Endwagen 1, Ordnungsnummer 0xx) ab.
+     */
+    function suggestVehicleFromTz(tzNum) {
+      const key = extractTzKey(tzNum);
+      if (!key || !/^\d{3,4}$/.test(key)) return '';
+      const code = parseInt(key, 10);
+      if (Number.isNaN(code)) return '';
+
+      const pad3 = (n) => String(n).padStart(3, '0');
+
+      // Tz 701 - 799 -> BR 407 0xx
+      if (code >= 701 && code <= 799) {
+        return `407 ${pad3(code - 700)}`;
+      }
+      // Tz 8001 - 8099 -> BR 408 0xx (ICE 3neo)
+      if (code >= 8001 && code <= 8099) {
+        return `408 ${pad3(code - 8000)}`;
+      }
+      // Tz 301 - 399 -> BR 403 0xx
+      if (code >= 301 && code <= 399) {
+        return `403 ${pad3(code - 300)}`;
+      }
+      // Tz 4601 - 4699 -> BR 406 0xx
+      if (code >= 4601 && code <= 4699) {
+        return `406 ${pad3(code - 4600)}`;
+      }
+      // Tz 101 - 199 -> BR 401 0xx
+      if (code >= 101 && code <= 199) {
+        return `401 ${pad3(code - 100)}`;
+      }
+      // Tz 201 - 299 -> BR 402 0xx
+      if (code >= 201 && code <= 299) {
+        return `402 ${pad3(code - 200)}`;
+      }
+      // Tz 1101 - 1199 -> BR 411 0xx
+      if (code >= 1101 && code <= 1199) {
+        return `411 ${pad3(code - 1100)}`;
+      }
+      // Tz 1501 - 1599 -> BR 415 0xx
+      if (code >= 1501 && code <= 1599) {
+        return `415 ${pad3(code - 1500)}`;
+      }
+      // Tz 9001 - 9499 -> BR 412 xxx (ICE 4: 9005 -> 412 005, 9205 -> 412 205, 9405 -> 412 405)
+      if (code >= 9001 && code <= 9499) {
+        return `412 ${pad3(code - 9000)}`;
+      }
+
+      return '';
+    }
+
+    function detectSeriesFromNumber(vehicleNum, tzNum = '') {
+      const norm = normalizeVehicleNumber(vehicleNum);
+      const match = norm.match(/^(\d{3})/);
+      if (match) {
+        const prefix = match[1];
+        return SERIES_RULES[prefix] || `BR ${prefix}`;
+      }
+
+      const tzKey = extractTzKey(tzNum);
+      if (!tzKey) return '';
+      if (/^7\d{2}$/.test(tzKey)) return 'BR 407 (Velaro D)';
+      if (/^1\d{2}$/.test(tzKey)) return 'BR 401 (ICE 1)';
+      if (/^2\d{2}$/.test(tzKey)) return 'BR 402 (ICE 2)';
+      if (/^3\d{2}$/.test(tzKey)) return 'BR 403 (ICE 3)';
+      if (/^46\d{2}$/.test(tzKey)) return 'BR 406 (ICE 3M)';
+      if (/^80\d{2}$/.test(tzKey)) return 'BR 408 (ICE 3neo)';
+      if (/^11\d{2}$/.test(tzKey)) return 'BR 411 (ICE-T)';
+      if (/^15\d{2}$/.test(tzKey)) return 'BR 415 (ICE-T)';
+      if (/^9[0-4]\d{2}$/.test(tzKey)) return 'BR 412 (ICE 4)';
+      return '';
+    }
+
+
+/* ---- Fahrzeugnummer / Tz / Baureihe: gegenseitige Ergänzung wie im Tf-Fahrzeugbuch ---- */
+let sy={vm:0,tm:0,va:0,ta:0},acList=[];
+const bd=(id,on)=>{const el=$('#'+id);if(el)el.classList.toggle('hidden',!on)};
+const clrBtn=()=>{const c=$('#clr');if(c)c.classList.toggle('hidden',!$('#in-veh').value&&!$('#in-tz').value)};
+function applyTz(v){d.tz=v;['ab','um','vo'].forEach(b=>{if(!d[b].m){d[b].tz=v;const el=document.querySelector(`[data-k="${b}.tz"]`);if(el)el.value=v}})}
+function known(){const m=new Map();db.forEach(e=>{const v=e.veh?normalizeVehicleNumber(e.veh):'',k=v||(e.tz?'TZ'+e.tz:'');if(k&&!m.has(k))m.set(k,{veh:v,tz:e.tz||'',br:e.br||''})});return [...m.values()]}
+function fromVeh(){const el=$('#in-veh'),tzEl=$('#in-tz'),brEl=$('#in-br'),raw=el.value.trim();d.veh=raw;
+  if(!raw){sy.vm=0;sy.va=0;bd('b-veh',0);if(!sy.tm||sy.ta){tzEl.value='';sy.tm=0;sy.ta=0;bd('b-tz',0);applyTz('')}clrBtn();return}
+  sy.vm=1;sy.va=0;bd('b-veh',0);const nv=normalizeVehicleNumber(raw);
+  if(!sy.tm||sy.ta||!tzEl.value.trim()){
+    const kn=known().find(x=>x.veh&&x.veh===nv&&x.tz),tz=kn?'Tz '+kn.tz:suggestTzNumber(nv);
+    if(tz){tzEl.value=tz;sy.ta=1;sy.tm=0;bd('b-tz',1);applyTz(extractTzKey(tz).toUpperCase())}
+    else if(sy.ta){tzEl.value='';sy.ta=0;bd('b-tz',0);applyTz('')}}
+  const s=detectSeriesFromNumber(nv,tzEl.value);if(s){brEl.value=s;d.br=s}clrBtn()}
+function fromTz(){const el=$('#in-tz'),vEl=$('#in-veh'),brEl=$('#in-br'),raw=el.value.trim();
+  if(!raw){sy.tm=0;sy.ta=0;bd('b-tz',0);applyTz('');if(!sy.vm||sy.va){vEl.value='';d.veh='';sy.vm=0;sy.va=0;bd('b-veh',0)}clrBtn();return}
+  sy.tm=1;sy.ta=0;bd('b-tz',0);const key=extractTzKey(raw).toUpperCase();applyTz(key);
+  if(!sy.vm||sy.va||!vEl.value.trim()){
+    const kn=known().find(x=>x.tz&&x.tz===key&&x.veh),v=kn?kn.veh:suggestVehicleFromTz(raw);
+    if(v){vEl.value=v;d.veh=v;sy.va=1;sy.vm=0;bd('b-veh',1)}
+    else if(sy.va){vEl.value='';d.veh='';sy.va=0;bd('b-veh',0)}}
+  const s=detectSeriesFromNumber(vEl.value,raw);if(s){brEl.value=s;d.br=s}clrBtn()}
+function showAc(){const box=$('#ac'),q=$('#in-veh').value.trim().toLowerCase(),qk=extractTzKey($('#in-veh').value);
+  if(!q){box.classList.add('hidden');return}
+  acList=known().filter(v=>(v.veh||'').toLowerCase().includes(q)||('tz '+v.tz).toLowerCase().includes(q)||(v.br||'').toLowerCase().includes(q)||(qk&&(v.tz||'').toLowerCase().includes(qk))).slice(0,8);
+  if(!acList.length){box.classList.add('hidden');return}
+  box.innerHTML=acList.map((v,i)=>`<button type="button" data-ac="${i}"><b>${esc(v.veh||'–')}</b>${v.tz?`<i>Tz ${esc(v.tz)}</i>`:''}<small>${esc(v.br||'')}</small></button>`).join('');box.classList.remove('hidden')}
+function pickAc(i){const v=acList[i];if(!v)return;d.veh=v.veh;d.br=v.br;sy={vm:1,tm:1,va:0,ta:0};
+  $('#in-veh').value=v.veh;$('#in-tz').value=v.tz?'Tz '+v.tz:'';$('#in-br').value=v.br;bd('b-veh',0);bd('b-tz',0);$('#ac').classList.add('hidden');applyTz(v.tz);clrBtn()}
+function vehBlock(){return `<div class="vg">
+<div class="vc1"><div class="lh"><label for="in-veh">Fahrzeugnummer</label><span class="auto ${sy.va?'':'hidden'}" id="b-veh">Auto-ergänzt</span></div>
+<div class="rel"><input id="in-veh" type="text" inputmode="numeric" autocomplete="off" placeholder="z. B. 407 007" value="${esc(d.veh)}" style="padding-right:40px"><button type="button" class="x ${d.veh||d.tz?'':'hidden'}" id="clr" data-act="clr" aria-label="Eingabe leeren">${IC.x}</button></div>
+<div id="ac" class="ac hidden"></div></div>
+<div><div class="lh"><label for="in-tz">Tz-Nummer</label><span class="auto ${sy.ta?'':'hidden'}" id="b-tz">Auto-ergänzt</span></div>
+<input id="in-tz" type="text" inputmode="numeric" autocomplete="off" placeholder="z. B. Tz 707" value="${esc(d.tz?'Tz '+d.tz:'')}"></div>
+<div><div class="lh"><label for="in-br">Baureihe (Auto)</label></div>
+<input id="in-br" type="text" autocomplete="off" placeholder="z. B. BR 407 (Velaro D)" value="${esc(d.br)}" style="font-size:15px;font-weight:600"></div></div>
+<p class="hp">${IC.swap}<span>Mindestens <b>Fahrzeugnummer oder Tz-Nummer</b> angeben – beide Felder ergänzen sich automatisch gegenseitig (<span class="mono">407 007 ↔ Tz 707</span>).</span></p>`}
+
+/* ---- Formular ---- */
+const inp=(lab,k,t,ph,len)=>`<label class="f"><span>${lab}</span><input data-k="${k}" data-t="${t}" value="${esc(get(d,k))}" placeholder="${ph||''}" autocomplete="off" ${len?`maxlength="${len}"`:''} ${t=='n'?'inputmode="numeric" pattern="[0-9]*"':'inputmode="text" autocapitalize="characters" spellcheck="false"'}></label>`;
+const typ=b=>`<div class="seg">${['FGM','FF'].map(v=>`<button class="chip ${d[b].typ==v?'on':''}" data-typ="${b}" data-v="${v}">${d[b].typ==v?'☑':'☐'} ${v}</button>`).join('')}</div>`;
+const head=(b,x='')=>`<h3 style="color:var(--c)">${NAME[b]}${x}</h3>`;
+const wrap=(b,h)=>d.on[b]?`<div class="card blk" style="--c:${COL[b]}">${h}</div>`:'';
+const zeit=(lab,k)=>`<label class="f"><span>${lab}</span><input type="time" data-k="${k}" data-t="d" value="${esc(get(d,k))}"></label>`;
+function fahrtHtml(p,lab){return inp(lab,p+'.zug','n','Zugnummer',6)+`<div class="g2">${inp('Strecke von',p+'.von','c','ABC',8)}${inp('nach',p+'.nach','c','XYZ',8)}</div>`}
+function render(){
+  const z=d.zu;
+  $('#form').innerHTML=`<div class="card"><div class="ch"><h2>${IC.train}Auftrag erfassen</h2><span class="bdg">Schnellerfassung</span></div>${vehBlock()}<div class="g2"><label class="f" style="grid-column:1/-1"><span>Datum / Uhrzeit</span><input type="datetime-local" data-k="dt" data-t="d" value="${esc(d.dt)}"></label></div>
+  <div class="chips">${Object.keys(NAME).map(b=>`<button class="chip ${d.on[b]?'on':''}" style="--c:${COL[b]};--t:${COLT[b]||'#fff'}" data-on="${b}">${NAME[b]}</button>`).join('')}</div>
+  <div class="mu" style="margin:0">Blöcke frei kombinierbar, die Tz wird überall übernommen.</div></div>`
+  +wrap('vo',head('vo')+inp('Für Zugnummer','vo.zug','n','',6)+inp('Tz-Nummer','vo.tz','n','',12)+inp('Gleis','vo.g','n','',3)+typ('vo'))
+  +wrap('ab',head('ab')+inp('Aus Zugnummer','ab.zug','n','',6)+inp('Tz-Nummer','ab.tz','n','',12)+inp('nach Gleis','ab.gn','n','',3)+zeit('Weckzeit','ab.weck'))
+  +wrap('um',head('um')+inp('Für Zugnummer','um.zug','n','',6)+inp('Tz-Nummer','um.tz','n','',12)+`<div class="g2">${inp('von Gleis','um.gv','n','',3)}${inp('nach Gleis','um.gn','n','',3)}</div>`+zeit('Weckzeit','um.weck')+typ('um'))
+  +wrap('zu',head('zu')+fahrtHtml('zu','Zugnummer Zufahrt')
+    +(z.rueck?`<div class="rueck"><h3 style="margin:0 0 8px;color:var(--c)">⇄ Rückfahrt</h3>${fahrtHtml('zu.rueck','Zugnummer Rückfahrt')}<div class="row"><button class="mini" data-act="swap">Strecke neu umkehren</button><button class="mini" data-act="unrueck">Entfernen</button></div></div>`
+      :`<button class="btn a" data-act="rueck">⇄ Rückfahrt hinzufügen</button>`))
+  +`<div class="card"><label class="f" style="margin:0"><span>Notiz (optional)</span><textarea data-k="note" data-t="x" placeholder="z. B. Besonderheit, Weisung …">${esc(d.note)}</textarea></label></div>
+  <button class="btn" data-act="save">${IC.chk}${editing?'Änderung speichern':'Auftrag speichern'}</button>
+  <button class="btn s" data-act="next">Speichern + Folgeauftrag (gleiche Tz)</button>
+  ${editing?'<button class="btn s" data-act="cancel">Abbrechen</button>':''}`;}
+
+/* ---- Liste ---- */
+function lines(e){const o=[],w=f=>f.weck?` · <span class="wk">Weck ${fmtW(f.weck)}</span>`:'',s=f=>`${esc(f.von||'?')} → ${esc(f.nach||'?')}`;
+  if(e.on.ab)o.push(['ab',`<b>Abdienst</b> aus ${esc(e.ab.zug||'–')} → Gl ${esc(e.ab.gn||'–')}${w(e.ab)}`]);
+  if(e.on.um)o.push(['um',`<b>Umstellen</b> für ${esc(e.um.zug||'–')} · Gl ${esc(e.um.gv||'–')} → ${esc(e.um.gn||'–')} ${e.um.typ?`· ${e.um.typ}`:''}${w(e.um)}`]);
+  if(e.on.zu){o.push(['zu',`<b>Zufahrt</b> Zug ${esc(e.zu.zug||'–')}: ${s(e.zu)}`]);
+    if(e.zu.rueck)o.push(['zu',`<b>Rückfahrt</b> Zug ${esc(e.zu.rueck.zug||'–')}: ${s(e.zu.rueck)}`])}
+  if(e.on.vo)o.push(['vo',`<b>Vordienst</b> für ${esc(e.vo.zug||'–')} · Gl ${esc(e.vo.g||'–')} ${e.vo.typ?`· ${e.vo.typ}`:''}`]);
+  const ord=['vo','ab','um','zu'];return o.sort((a,b)=>ord.indexOf(a[0])-ord.indexOf(b[0]))}
+const plain=e=>`${[e.veh,e.tz&&'Tz '+e.tz].filter(Boolean).join(' · ')||'–'} (${fmtD(e.dt)})\n`+lines(e).map(l=>'• '+l[1].replace(/<[^>]+>/g,'').replace(/&gt;/g,'>').replace(/&amp;/g,'&')).join('\n')+(e.note?'\n'+e.note:'');
+function list(){const q=$('#q').value,r=db.filter(e=>!q||(e.tz||'').includes(q)||(e.veh||'').replace(/\D/g,'').includes(q));
+  $('#list').innerHTML=r.length?r.map(e=>`<div class="card"><div class="hd"><span>${esc(e.veh||'')}${e.veh&&e.tz?' · ':''}${e.tz?'Tz '+esc(e.tz):(e.veh?'':'–')}</span><small>${fmtD(e.dt)}</small></div>${e.br?`<div class="mu" style="text-align:left;margin:2px 0 0;font-size:12px">${esc(e.br)}</div>`:''}
+  ${lines(e).map(l=>`<div class="ln" style="--c:${COL[l[0]]}">${l[1]}</div>`).join('')||'<div class="mu">Keine Blöcke gewählt</div>'}
+  ${e.note?`<div class="ln" style="--c:var(--bd);color:var(--mu)">${esc(e.note)}</div>`:''}
+  <div class="row"><button class="mini" data-edit="${e.id}">Bearbeiten</button><button class="mini" data-copy="${e.id}">Teilen</button><button class="mini" data-del="${e.id}" style="${delArm==e.id?'background:var(--acd);box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--ac)':''}">${delArm==e.id?'Sicher?':'Löschen'}</button></div></div>`).join(''):'<div class="mu">Noch keine Aufträge.</div>'}
+
+/* ---- Eingaben ---- */
+document.addEventListener('input',e=>{const el=e.target;if(el.id=='in-veh'){fromVeh();showAc();return}if(el.id=='in-tz'){fromTz();return}if(el.id=='in-br'){d.br=el.value;return}const k=el.dataset.k;if(!k)return;let v=el.value;const t=el.dataset.t;
+  if(t=='n'){v=v.replace(/\D/g,'');if(v!=el.value)el.value=v}
+  else if(t=='c'){v=v.toUpperCase().replace(/[^A-ZÄÖÜ0-9 \-]/g,'');if(v!=el.value)el.value=v}
+  set(d,k,v);
+  if(k=='tz')applyTz(v);
+  else if(/^(ab|um|vo)\.tz$/.test(k))d[k.split('.')[0]].m=!!v});
+document.addEventListener('focusout',e=>{const el=e.target;
+  if(el.id=='in-veh'&&el.value.trim()){el.value=normalizeVehicleNumber(el.value);d.veh=el.value}
+  if(el.id=='in-tz'&&el.value.trim()){el.value=normalizeTzNumber(el.value);applyTz(extractTzKey(el.value).toUpperCase())}});
+document.addEventListener('click',e=>{if(!e.target.closest('.vc1')){const a=$('#ac');a&&a.classList.add('hidden')}const b=e.target.closest('button');if(!b)return;const D=b.dataset;
+  if(D.tab)tab(D.tab);
+  else if(D.ac!==undefined)pickAc(+D.ac);
+  else if(D.act=='clr'){d.veh=d.tz=d.br='';sy={vm:0,tm:0,va:0,ta:0};applyTz('');render()}
+  else if(D.on){d.on[D.on]=d.on[D.on]?0:1;render()}
+  else if(D.typ){d[D.typ].typ=d[D.typ].typ==D.v?'':D.v;render()}
+  else if(D.act=='rueck'){const z=d.zu;z.rueck={zug:'',von:z.nach,nach:z.von};render();document.querySelector('[data-k="zu.rueck.zug"]').focus()}
+  else if(D.act=='swap'){const z=d.zu,r=z.rueck;r.von=z.nach;r.nach=z.von;render()}
+  else if(D.act=='unrueck'){d.zu.rueck=null;render()}
+  else if(D.act=='save'||D.act=='next'){const tz=d.tz,veh=d.veh,br=d.br;
+    if(editing){db=db.map(x=>x.id==editing?d:x)}else db.unshift(d);
+    save();editing=null;d=blank(D.act=='next'?tz:'');if(D.act=='next'){d.veh=veh;d.br=br}sy=D.act=='next'?{vm:+!!veh,tm:+!!tz,va:0,ta:0}:{vm:0,tm:0,va:0,ta:0};render();list();toast('Auftrag gespeichert');scrollTo(0,0)}
+  else if(D.act=='cancel'){editing=null;d=blank();sy={vm:0,tm:0,va:0,ta:0};render()}
+  else if(D.edit){editing=D.edit;d=JSON.parse(JSON.stringify(db.find(x=>x.id==D.edit)));sy={vm:+!!d.veh,tm:+!!d.tz,va:0,ta:0};render();tab('erfassen')}
+  else if(D.copy){const t=plain(db.find(x=>x.id==D.copy));if(navigator.share)navigator.share({text:t}).catch(()=>{});else navigator.clipboard&&navigator.clipboard.writeText(t)}
+  else if(D.del){if(delArm==D.del){db=db.filter(x=>x.id!=D.del);save();delArm=null}else delArm=D.del;list()}});
+$('#q').addEventListener('input',e=>{e.target.value=e.target.value.replace(/\D/g,'');list()});
+$('#exp').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(db)],{type:'application/json'}));a.download='auftragsbuch-backup-'+now().slice(0,10)+'.json';a.click()};
+$('#imp').onclick=()=>$('#file').click();
+$('#file').onchange=async e=>{try{const j=JSON.parse(await e.target.files[0].text());if(Array.isArray(j)){const ids=new Set(db.map(x=>x.id));db=db.concat(j.filter(x=>x&&x.id&&!ids.has(x.id))).sort((a,b)=>b.dt>a.dt?1:-1);save();list()}}catch(err){}};
+const tab=n=>{['erfassen','liste','backup'].forEach(t=>{$('#tab-'+t).classList.toggle('hidden',t!=n);document.querySelector(`[data-tab="${t}"]`).classList.toggle('on',t==n)});scrollTo(0,0)};
+let tt;const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2200)};
+const THEME='tf_fahrzeugbuch_theme_v1',root=document.documentElement;
+if(st.get(THEME)==='light')root.classList.remove('dark');
+$('#theme').onclick=()=>{root.classList.toggle('dark');st.set(THEME,root.classList.contains('dark')?'dark':'light')};
+render();list();
+if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol))navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
