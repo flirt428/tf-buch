@@ -1,6 +1,6 @@
 // Service Worker – Tf-Fahrzeugbuch
 // Bei Änderungen an der App: VERSION hochzählen, dann holen sich die Geräte die neue Version.
-const VERSION = 'v8';
+const VERSION = 'v9';
 const CACHE = 'tf-fahrzeugbuch-' + VERSION;
 
 const LOCAL_ASSETS = [
