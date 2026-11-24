@@ -1,6 +1,6 @@
 // Service Worker – Tf-Fahrzeugbuch
 // Bei Änderungen an der App: VERSION hochzählen, dann holen sich die Geräte die neue Version.
-const VERSION = 'v6';
+const VERSION = 'v8';
 const CACHE = 'tf-fahrzeugbuch-' + VERSION;
 
 const LOCAL_ASSETS = [
@@ -18,7 +18,7 @@ const LOCAL_ASSETS = [
 const CDN_ASSETS = [
   'https://cdn.tailwindcss.com',
   'https://unpkg.com/lucide@latest',
-  'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap'
+  'https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600;700;800&display=swap'
 ];
 
 self.addEventListener('install', (event) => {
