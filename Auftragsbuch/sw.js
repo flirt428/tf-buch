@@ -1,5 +1,5 @@
 // Service Worker – Auftragsbuch (bei Änderungen VERSION hochzählen)
-const VERSION = 'v11';
+const VERSION = 'v13';
 const CACHE = 'auftragsbuch-' + VERSION;
 const ASSETS = ['./', './index.html', './manifest.webmanifest',
   './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png',

@@ -50,7 +50,7 @@ input[data-t=c]{text-transform:uppercase}
 input:focus,textarea:focus{border-color:var(--ac);box-shadow:0 0 0 2px rgba(236,0,22,.2)}
 input[type=datetime-local],input[type=time]{font:500 16px var(--fn);min-height:48px}
 textarea{font:500 15px var(--fn);min-height:48px;resize:vertical}
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 10px}
+.chips{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:2px 0 10px}.chips .chip{min-width:0;width:100%}
 .chip{flex:1 1 auto;min-width:44%;padding:12px 10px;border-radius:12px;border:1.5px solid rgba(236,0,22,.55);background:transparent;color:var(--tx);font:600 14px var(--fn);text-align:center;transition:transform .1s}
 .chip.on{background:var(--ac);border-color:var(--ac);color:#fff}
 .seg{display:flex;gap:8px;margin-bottom:4px}.seg .chip{min-width:0;flex:1}
@@ -397,7 +397,7 @@ function render(){
       :`<button class="btn a" data-act="rueck">⇄ Rückfahrt hinzufügen</button>`))
   +`<div class="card"><label class="f" style="margin:0"><span>Notiz (optional)</span><textarea data-k="note" data-t="x" placeholder="z. B. Besonderheit, Weisung …">${esc(d.note)}</textarea></label></div>
   <button class="btn" data-act="save">${IC.chk}${editing?'Änderung speichern':'Auftrag speichern'}</button>
-  <button class="btn s" data-act="next">Speichern + Folgeauftrag (gleiche Tz)</button>
+  <button class="btn s" data-act="next">Speichern + Folgeauftrag (gleicher Tz)</button>
   ${editing?'<button class="btn s" data-act="cancel">Abbrechen</button>':''}`;}
 
 /* ---- Liste ---- */
