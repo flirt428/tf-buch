@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Tf-Fahrzeugbuch – Diensthistorie, Tz-Nummer &amp; Fahrzeugmacken</title>
+  <title>Tf-Fahrzeugbuch – Diensthistorie, Tz-Nummer &amp; Fahrzeugstörungen</title>
   <!-- PWA & Mobile Vollbild-Meta-Tags (Android/Chrome & iOS) -->
   <meta name="theme-color" content="#0f172a" />
   <meta name="mobile-web-app-capable" content="yes" />
@@ -48,6 +48,10 @@
     body {
       overscroll-behavior-y: contain;
     }
+    /* DB-Verkehrsrot für alle Aktions-Buttons */
+    .btn-db, .btn-db:hover { background: #EC0016 !important; color: #fff !important; border: 1px solid #EC0016 !important; }
+    .btn-db:hover { background: #C20012 !important; border-color: #C20012 !important; }
+    .btn-db *, .btn-db svg { color: #fff !important; }
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -81,6 +85,7 @@
 
       <div class="flex items-center gap-2 shrink-0">
         <div id="header-stats-badge" class="hidden sm:flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700"></div>
+        <a href="Auftragsbuch/" class="btn-db flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-[13px] font-semibold transition active:scale-95" style="text-decoration:none">Auftragsbuch</a>
         <button id="theme-toggle" type="button" aria-label="Nachtschicht- und Tagmodus umschalten"
           class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 transition active:scale-95">
           <i data-lucide="sun" class="w-5 h-5 hidden dark:block text-amber-400"></i>
@@ -107,7 +112,7 @@
       </div>
       <div class="flex items-center gap-1.5 shrink-0">
         <button type="button" id="btn-banner-install"
-          class="px-3 py-2 rounded-xl bg-rail-red hover:bg-rail-redDark text-white text-xs font-bold transition active:scale-95">
+          class="btn-db px-3 py-2 rounded-xl bg-rail-red hover:bg-rail-redDark text-white text-xs font-bold transition active:scale-95">
           Installieren
         </button>
         <button type="button" id="btn-banner-dismiss" aria-label="Installationshinweis schließen"
@@ -189,7 +194,7 @@
           <span>Mindestens <strong>Fahrzeugnummer oder Tz-Nummer</strong> angeben – beide Felder ergänzen sich automatisch gegenseitig (<span class="font-mono">407 007 ↔ Tz 707</span>).</span>
         </p>
 
-        <!-- Live-Macken-Vorschau -->
+        <!-- Live-Störungs-Vorschau -->
         <div id="live-vehicle-preview" class="hidden rounded-xl border p-3.5 transition-all"></div>
 
         <!-- Datum, Uhrzeit & "Jetzt"-Button -->
@@ -210,7 +215,7 @@
           </div>
           <div class="sm:col-span-3">
             <button type="button" id="btn-set-now"
-              class="w-full py-3 px-3 rounded-xl bg-slate-200/80 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold text-sm flex items-center justify-center gap-1.5 transition active:scale-95 border border-slate-300 dark:border-slate-700">
+              class="btn-db w-full py-3 px-3 rounded-xl bg-slate-200/80 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold text-sm flex items-center justify-center gap-1.5 transition active:scale-95 border border-slate-300 dark:border-slate-700">
               <i data-lucide="clock" class="w-4 h-4 text-rail-red"></i>
               Jetzt
             </button>
@@ -227,13 +232,13 @@
             class="w-full px-3.5 py-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 focus:border-rail-red outline-none text-sm" />
         </div>
 
-        <!-- Direkter Toggle: Neue Eigenheit / Macke miterfassen -->
+        <!-- Direkter Toggle: Neue Eigenheit / Störung miterfassen -->
         <div class="pt-0.5">
           <button type="button" id="toggle-inline-quirk"
-            class="w-full py-2.5 px-3.5 rounded-xl border border-dashed border-amber-500/60 bg-amber-500/10 hover:bg-amber-500/15 text-amber-700 dark:text-amber-300 text-sm font-semibold flex items-center justify-between transition">
+            class="btn-db w-full py-2.5 px-3.5 rounded-xl border border-dashed border-amber-500/60 bg-amber-500/10 hover:bg-amber-500/15 text-amber-700 dark:text-amber-300 text-sm font-semibold flex items-center justify-between transition">
             <span class="flex items-center gap-2">
               <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-500 shrink-0"></i>
-              <span>Neue Eigenheit / Macke direkt miterfassen?</span>
+              <span>Neue Eigenheit / Störung direkt miterfassen?</span>
             </span>
             <i data-lucide="chevron-down" id="inline-quirk-chevron" class="w-4 h-4 transition-transform shrink-0"></i>
           </button>
@@ -241,7 +246,7 @@
           <div id="inline-quirk-fields" class="hidden mt-3 p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950/90 border border-slate-200 dark:border-slate-800 space-y-3">
             <div>
               <label for="inline-quirk-text" class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
-                Beschreibung der Eigenheit oder Macke
+                Beschreibung der Eigenheit oder Störung
               </label>
               <textarea id="inline-quirk-text" rows="2"
                 placeholder="z. B. Fst 1: Sifa-Fußtaster prellt leicht, Zugkraftsteller weich"
@@ -252,7 +257,7 @@
                 <label for="inline-quirk-cat" class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Kategorie</label>
                 <select id="inline-quirk-cat" class="w-full px-3 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-sm outline-none">
                   <option value="Eigenheit">Eigenheit</option>
-                  <option value="Macke">Macke</option>
+                  <option value="Störung">Störung</option>
                   <option value="Bremse">Bremse</option>
                   <option value="Tür/Einstieg">Tür / Einstieg</option>
                   <option value="Zugsteuerung/PZB/LZB/ETCS">Zugsteuerung / PZB / LZB / ETCS</option>
@@ -265,7 +270,7 @@
                 <label for="inline-quirk-sev" class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Schweregrad / Status</label>
                 <select id="inline-quirk-sev" class="w-full px-3 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-sm outline-none">
                   <option value="info">Eigenheit / Hinweis (offen)</option>
-                  <option value="warning">Macke / Störung (offen)</option>
+                  <option value="warning">Störung (offen)</option>
                 </select>
               </div>
             </div>
@@ -274,7 +279,7 @@
 
         <!-- Speichern-Button -->
         <button type="submit"
-          class="w-full py-3.5 px-5 rounded-xl bg-rail-red hover:bg-rail-redDark text-white font-bold text-base shadow-lg shadow-red-600/25 flex items-center justify-center gap-2 transition active:scale-[0.99]">
+          class="btn-db w-full py-3.5 px-5 rounded-xl bg-rail-red hover:bg-rail-redDark text-white font-bold text-base shadow-lg shadow-red-600/25 flex items-center justify-center gap-2 transition active:scale-[0.99]">
           <i data-lucide="check-circle-2" class="w-5 h-5"></i>
           Einsatz speichern
         </button>
@@ -284,7 +289,7 @@
       <div class="space-y-2.5">
         <div class="flex items-center justify-between px-1">
           <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Zuletzt bediente Fahrzeuge</h3>
-          <button type="button" onclick="switchTab('historie')" class="text-xs font-semibold text-rail-red hover:underline">Zur Historie →</button>
+          <button type="button" onclick="switchTab('historie')" class="btn-db text-xs font-semibold text-rail-red hover:underline">Zur Historie →</button>
         </div>
         <div id="recent-shifts-list" class="space-y-2.5"></div>
       </div>
@@ -297,12 +302,12 @@
           <div>
             <h2 class="font-bold text-lg flex items-center gap-2">
               <i data-lucide="wrench" class="w-5 h-5 text-amber-500"></i>
-              Fahrzeugakte &amp; Macken
+              Fahrzeugakte &amp; Störungen
             </h2>
-            <p class="text-xs text-slate-500 dark:text-slate-400">Fahrzeugnummer, Tz-Nummer, Einsätze &amp; hinterlegte Eigenheiten/Macken</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Fahrzeugnummer, Tz-Nummer, Einsätze &amp; hinterlegte Eigenheiten/Störungen</p>
           </div>
           <button type="button" onclick="openQuirkModal()"
-            class="px-3.5 py-2.5 rounded-xl bg-rail-red hover:bg-rail-redDark text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 shadow-md shadow-red-600/20 active:scale-95 transition shrink-0">
+            class="btn-db px-3.5 py-2.5 rounded-xl bg-rail-red hover:bg-rail-redDark text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 shadow-md shadow-red-600/20 active:scale-95 transition shrink-0">
             <i data-lucide="plus" class="w-4 h-4"></i>
             Neue Notiz
           </button>
@@ -317,8 +322,8 @@
           </div>
           <select id="vehicle-quirk-filter" class="px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-sm outline-none font-medium">
             <option value="ALL">Alle Fahrzeuge</option>
-            <option value="OPEN_QUIRKS">Mit offenen Macken/Eigenheiten</option>
-            <option value="WARNINGS">Nur Macken / Störungen</option>
+            <option value="OPEN_QUIRKS">Mit offenen Störungen/Eigenheiten</option>
+            <option value="WARNINGS">Nur Störungen</option>
             <option value="INFO_ONLY">Nur Eigenheiten / Hinweise</option>
           </select>
         </div>
@@ -342,7 +347,7 @@
           <div class="relative flex-1">
             <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
             <input type="text" id="history-search"
-              placeholder="Fzg-Nr., Tz-Nr., Baureihe, Zug/Strecke oder Macken durchsuchen..."
+              placeholder="Fzg-Nr., Tz-Nr., Baureihe, Zug/Strecke oder Störungen durchsuchen..."
               class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 focus:border-rail-red outline-none text-sm" />
           </div>
           <select id="history-series-filter" class="px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-sm outline-none font-medium">
@@ -377,7 +382,7 @@
 
         <div id="pwa-install-action-row" class="flex flex-col sm:flex-row gap-2.5">
           <button type="button" id="btn-pwa-install"
-            class="w-full py-3 px-4 rounded-xl bg-rail-red hover:bg-rail-redDark disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-sm shadow-lg shadow-red-600/20 flex items-center justify-center gap-2 transition active:scale-95">
+            class="btn-db w-full py-3 px-4 rounded-xl bg-rail-red hover:bg-rail-redDark disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-sm shadow-lg shadow-red-600/20 flex items-center justify-center gap-2 transition active:scale-95">
             <i data-lucide="download-cloud" class="w-4 h-4"></i>
             <span>Jetzt als App installieren</span>
           </button>
@@ -409,7 +414,7 @@
         <!-- Export & Datei-Upload -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
           <button type="button" id="btn-export-json"
-            class="py-3.5 px-4 rounded-xl bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 text-white font-semibold text-sm flex items-center justify-center gap-2 border border-slate-700 transition active:scale-95">
+            class="btn-db py-3.5 px-4 rounded-xl bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 text-white font-semibold text-sm flex items-center justify-center gap-2 border border-slate-700 transition active:scale-95">
             <i data-lucide="download" class="w-4 h-4 text-emerald-400"></i>
             JSON-Backup exportieren
           </button>
@@ -444,7 +449,7 @@
             class="w-full font-mono text-xs p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 focus:border-rail-red outline-none"></textarea>
 
           <button type="button" id="btn-import-json-text"
-            class="w-full py-2.5 px-4 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-700 dark:text-amber-300 font-bold text-sm border border-amber-500/40 flex items-center justify-center gap-2 transition">
+            class="btn-db w-full py-2.5 px-4 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-700 dark:text-amber-300 font-bold text-sm border border-amber-500/40 flex items-center justify-center gap-2 transition">
             <i data-lucide="file-check-2" class="w-4 h-4"></i>
             Eingefügtes JSON importieren
           </button>
@@ -459,12 +464,12 @@
         </h3>
         <div class="flex flex-col sm:flex-row gap-2.5">
           <button type="button" id="btn-load-demo"
-            class="flex-1 py-3 px-4 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700 transition">
+            class="btn-db flex-1 py-3 px-4 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700 transition">
             <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
             Beispieldaten laden
           </button>
           <button type="button" id="btn-clear-all"
-            class="flex-1 py-3 px-4 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 border border-red-500/30 transition">
+            class="btn-db flex-1 py-3 px-4 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 border border-red-500/30 transition">
             <i data-lucide="trash-2" class="w-4 h-4"></i>
             Alle Daten löschen
           </button>
@@ -472,11 +477,11 @@
 
         <div id="delete-confirm-box" class="hidden p-3.5 rounded-xl bg-red-500/10 border border-red-500/40 space-y-2.5">
           <p class="text-xs font-medium text-red-700 dark:text-red-300">
-            Sicherheitsabfrage: Alle erfassten Einsätze, Tz-Zuordnungen und Fahrzeugmacken unwiderruflich löschen?
+            Sicherheitsabfrage: Alle erfassten Einsätze, Tz-Zuordnungen und Fahrzeugstörungen unwiderruflich löschen?
           </p>
           <div class="flex gap-2">
-            <button type="button" id="btn-confirm-wipe" class="px-3.5 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-bold">Ja, unwiderruflich löschen</button>
-            <button type="button" id="btn-cancel-wipe" class="px-3.5 py-2 rounded-lg bg-slate-200 dark:bg-slate-800 text-xs font-semibold">Abbrechen</button>
+            <button type="button" id="btn-confirm-wipe" class="btn-db px-3.5 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-bold">Ja, unwiderruflich löschen</button>
+            <button type="button" id="btn-cancel-wipe" class="btn-db px-3.5 py-2 rounded-lg bg-slate-200 dark:bg-slate-800 text-xs font-semibold">Abbrechen</button>
           </div>
         </div>
       </div>
@@ -506,13 +511,13 @@
     </div>
   </nav>
 
-  <!-- MODAL: MACKE / EIGENHEIT ANLEGEN ODER BEARBEITEN -->
+  <!-- MODAL: STÖRUNG / EIGENHEIT ANLEGEN ODER BEARBEITEN -->
   <div id="quirk-modal" class="hidden fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-white dark:bg-slate-900 w-full max-w-lg rounded-t-3xl sm:rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-2xl space-y-4">
       <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
         <h3 id="modal-title" class="font-bold text-lg flex items-center gap-2">
           <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-500"></i>
-          Eigenheit / Macke erfassen
+          Eigenheit / Störung erfassen
         </h3>
         <button type="button" onclick="closeQuirkModal()" aria-label="Modal schließen"
           class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-200">
@@ -558,7 +563,7 @@
             <label for="modal-quirk-cat" class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Kategorie</label>
             <select id="modal-quirk-cat" class="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-sm outline-none">
               <option value="Eigenheit">Eigenheit</option>
-              <option value="Macke">Macke</option>
+              <option value="Störung">Störung</option>
               <option value="Bremse">Bremse</option>
               <option value="Tür/Einstieg">Tür / Einstieg</option>
               <option value="Zugsteuerung/PZB/LZB/ETCS">Zugsteuerung / PZB / LZB / ETCS</option>
@@ -571,7 +576,7 @@
             <label for="modal-quirk-sev" class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Schweregrad</label>
             <select id="modal-quirk-sev" class="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-sm outline-none">
               <option value="info">Eigenheit / Hinweis</option>
-              <option value="warning">Macke / Störung</option>
+              <option value="warning">Störung</option>
             </select>
           </div>
         </div>
@@ -584,8 +589,8 @@
         </div>
 
         <div class="flex gap-2.5 pt-2">
-          <button type="button" onclick="closeQuirkModal()" class="flex-1 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 font-semibold text-sm">Abbrechen</button>
-          <button type="submit" class="flex-1 py-3 rounded-xl bg-rail-red hover:bg-rail-redDark text-white font-bold text-sm shadow-lg shadow-red-600/20">Speichern</button>
+          <button type="button" onclick="closeQuirkModal()" class="btn-db flex-1 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 font-semibold text-sm">Abbrechen</button>
+          <button type="submit" class="btn-db flex-1 py-3 rounded-xl bg-rail-red hover:bg-rail-redDark text-white font-bold text-sm shadow-lg shadow-red-600/20">Speichern</button>
         </div>
       </form>
     </div>
@@ -943,7 +948,7 @@
             tzNumber: 'Tz 112',
             series: 'BR 401 (ICE 1)',
             text: 'Scheibenwischer-Intervallstufe 1 ohne Funktion.',
-            category: 'Macke',
+            category: 'Störung',
             severity: 'warning',
             resolved: true,
             createdAt: offsetDate(10)
@@ -1000,7 +1005,7 @@
             tzNumber,
             series,
             text: String(q.text).trim(),
-            category: String(q.category || 'Eigenheit').trim(),
+            category: String(q.category || 'Eigenheit').trim().replace(/^Macke$/i, 'Störung'),
             severity: q.severity === 'warning' ? 'warning' : 'info',
             resolved: Boolean(q.resolved),
             createdAt: String(q.createdAt || new Date().toISOString().split('T')[0])
@@ -1269,7 +1274,7 @@
       btn.addEventListener('click', () => switchTab(btn.dataset.tab));
     });
 
-    // ==================== ERFASSEN: AUTOCOMPLETE & LIVE-MACKEN-VORSCHAU ====================
+    // ==================== ERFASSEN: AUTOCOMPLETE & LIVE-STÖRUNGS-VORSCHAU ====================
     const vehicleInput = document.getElementById('input-vehicle-num');
     const tzInput = document.getElementById('input-tz-num');
     const seriesInput = document.getElementById('input-series');
@@ -1304,7 +1309,7 @@
               ${openQuirks.length} offene ${openQuirks.length === 1 ? 'Notiz' : 'Notizen'} für ${escapeHTML(labelParts.join(' · '))}
             </span>
             <button type="button" onclick="openQuirkModal('${escapeHTML(normVeh)}', null, '${escapeHTML(normTz)}')"
-              class="text-xs font-bold underline text-amber-700 dark:text-amber-300 shrink-0">+ Hinzufügen</button>
+              class="btn-db text-xs font-bold underline text-amber-700 dark:text-amber-300 shrink-0">+ Hinzufügen</button>
           </div>
           <ul class="space-y-1.5">
             ${openQuirks.map(q => `
@@ -1327,10 +1332,10 @@
         livePreviewBox.innerHTML = `
           <span class="text-xs font-medium text-emerald-700 dark:text-emerald-300 flex items-center gap-2">
             <i data-lucide="check-circle" class="w-4 h-4 shrink-0"></i>
-            Keine offenen Macken für <strong class="font-mono">${escapeHTML(labelParts.join(' · '))}</strong>.
+            Keine offenen Störungen für <strong class="font-mono">${escapeHTML(labelParts.join(' · '))}</strong>.
           </span>
           <button type="button" onclick="openQuirkModal('${escapeHTML(normVeh)}', null, '${escapeHTML(normTz)}')"
-            class="text-xs font-bold text-emerald-700 dark:text-emerald-300 underline shrink-0">+ Notiz</button>
+            class="btn-db text-xs font-bold text-emerald-700 dark:text-emerald-300 underline shrink-0">+ Notiz</button>
         `;
       }
       lucide.createIcons();
@@ -1508,7 +1513,7 @@
         : `${toastSubject} in Historie gespeichert!`);
     });
 
-    // ==================== MACKEN MODAL (ANLEGEN / BEARBEITEN) ====================
+    // ==================== STÖRUNGEN MODAL (ANLEGEN / BEARBEITEN) ====================
     const modalVehInput = document.getElementById('modal-vehicle-num');
     const modalTzInput = document.getElementById('modal-tz-num');
     const modalSerInput = document.getElementById('modal-series');
@@ -1529,7 +1534,7 @@
       if (quirkId) {
         const existing = appState.quirks.find(q => q.id === quirkId);
         if (!existing) return;
-        titleEl.innerHTML = `<i data-lucide="pencil" class="w-5 h-5 text-amber-500"></i> Eigenheit / Macke bearbeiten`;
+        titleEl.innerHTML = `<i data-lucide="pencil" class="w-5 h-5 text-amber-500"></i> Eigenheit / Störung bearbeiten`;
         idInput.value = existing.id;
         modalVehInput.value = existing.vehicleNumber || suggestVehicleFromTz(existing.tzNumber);
         modalTzInput.value = existing.tzNumber || suggestTzNumber(existing.vehicleNumber);
@@ -1544,7 +1549,7 @@
         const normVeh = normalizeVehicleNumber(prefillVeh);
         const normPrefTz = normalizeTzNumber(prefillTz);
         const known = getAllVehiclesSummary().find(v => doesMatchVehicle(v.vehicleNumber, v.tzNumber, normVeh, normPrefTz));
-        titleEl.innerHTML = `<i data-lucide="alert-triangle" class="w-5 h-5 text-amber-500"></i> Eigenheit / Macke erfassen`;
+        titleEl.innerHTML = `<i data-lucide="alert-triangle" class="w-5 h-5 text-amber-500"></i> Eigenheit / Störung erfassen`;
         idInput.value = '';
         modalVehInput.value = normVeh || (known && known.vehicleNumber) || suggestVehicleFromTz(normPrefTz);
         modalTzInput.value = normPrefTz || (known && known.tzNumber) || suggestTzNumber(modalVehInput.value);
@@ -1707,7 +1712,7 @@
         </div>
         <div onclick="switchTab('fahrzeuge')" class="cursor-pointer bg-white dark:bg-slate-900 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-amber-500/50 text-center transition">
           <div class="text-xl sm:text-2xl font-extrabold font-mono text-amber-500">${openQuirks}</div>
-          <div class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Offene Macken</div>
+          <div class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Offene Störungen</div>
         </div>
       `;
 
@@ -1722,7 +1727,7 @@
         </div>
         <div>
           <div class="text-lg font-extrabold font-mono text-amber-500">${appState.quirks.length}</div>
-          <div class="text-xs text-slate-500">Macken &amp; Notizen</div>
+          <div class="text-xs text-slate-500">Störungen &amp; Notizen</div>
         </div>
       `;
     }
@@ -1771,13 +1776,13 @@
             </div>
 
             <div class="flex flex-col items-end gap-1.5 shrink-0">
-              <button type="button" onclick="openQuirkModal('${escapeHTML(normNum)}', null, '${escapeHTML(tzDisplay)}')" title="Eigenheit / Macke erfassen"
-                class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-amber-500/20 text-slate-600 dark:text-slate-300 hover:text-amber-500 transition">
+              <button type="button" onclick="openQuirkModal('${escapeHTML(normNum)}', null, '${escapeHTML(tzDisplay)}')" title="Eigenheit / Störung erfassen"
+                class="btn-db p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-amber-500/20 text-slate-600 dark:text-slate-300 hover:text-amber-500 transition">
                 <i data-lucide="wrench" class="w-4 h-4"></i>
               </button>
               ${allowDelete ? `
                 <button type="button" onclick="deleteShift('${escapeHTML(shift.id)}')" title="Historien-Eintrag löschen"
-                  class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-red-500/20 text-slate-400 hover:text-red-500 transition">
+                  class="btn-db p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-red-500/20 text-slate-400 hover:text-red-500 transition">
                   <i data-lucide="trash-2" class="w-4 h-4"></i>
                 </button>
               ` : ''}
@@ -1852,7 +1857,7 @@
         const secondaryTz = getSecondaryTzLabel(v.vehicleNumber, tzDisp);
         const lastInfo = v.lastShiftDate
           ? `Letzte Bedienung: ${formatDateGerman(v.lastShiftDate)} · ${escapeHTML(v.lastShiftTime)} Uhr`
-          : 'Bisher nur in Mackenliste erfasst';
+          : 'Bisher nur in Störungsliste erfasst';
 
         return `
           <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 space-y-3">
@@ -1877,18 +1882,18 @@
 
               <div class="flex items-center gap-1.5 shrink-0">
                 <button type="button" onclick="selectVehicleForNewShift('${escapeHTML(v.vehicleNumber || '')}', '${escapeHTML(tzDisp)}')"
-                  class="px-2.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold transition">
+                  class="btn-db px-2.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold transition">
                   + Fahrt
                 </button>
                 <button type="button" onclick="openQuirkModal('${escapeHTML(v.vehicleNumber || '')}', null, '${escapeHTML(tzDisp)}')"
-                  class="px-2.5 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-600 dark:text-amber-400 text-xs font-bold transition">
+                  class="btn-db px-2.5 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-600 dark:text-amber-400 text-xs font-bold transition">
                   + Notiz
                 </button>
               </div>
             </div>
 
             ${v.quirks.length === 0 ? `
-              <p class="text-xs text-slate-400 italic">Keine Eigenheiten oder Macken für dieses Fahrzeug hinterlegt.</p>
+              <p class="text-xs text-slate-400 italic">Keine Eigenheiten oder Störungen für dieses Fahrzeug hinterlegt.</p>
             ` : `
               <div class="space-y-2">
                 ${v.quirks.map(q => `
@@ -1903,7 +1908,7 @@
                           ${q.resolved
                             ? `<span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">Behoben</span>`
                             : q.severity === 'warning'
-                            ? `<span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-red-500/20 text-red-600 dark:text-red-400">Macke / Störung</span>`
+                            ? `<span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-red-500/20 text-red-600 dark:text-red-400">Störung</span>`
                             : `<span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400">Eigenheit</span>`
                           }
                           <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400">${escapeHTML(q.category)}</span>
@@ -1914,15 +1919,15 @@
 
                       <div class="flex items-center gap-1 shrink-0">
                         <button type="button" onclick="toggleQuirkResolved('${escapeHTML(q.id)}')" title="${q.resolved ? 'Wieder öffnen' : 'Als behoben markieren'}"
-                          class="p-1.5 rounded-lg hover:bg-emerald-500/20 ${q.resolved ? 'text-emerald-500' : 'text-slate-400 hover:text-emerald-500'} transition">
+                          class="btn-db p-1.5 rounded-lg hover:bg-emerald-500/20 ${q.resolved ? 'text-emerald-500' : 'text-slate-400 hover:text-emerald-500'} transition">
                           <i data-lucide="check-circle-2" class="w-4 h-4"></i>
                         </button>
                         <button type="button" onclick="openQuirkModal('', '${escapeHTML(q.id)}')" title="Bearbeiten"
-                          class="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition">
+                          class="btn-db p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition">
                           <i data-lucide="pencil" class="w-4 h-4"></i>
                         </button>
                         <button type="button" onclick="deleteQuirk('${escapeHTML(q.id)}')" title="Löschen"
-                          class="p-1.5 rounded-lg hover:bg-red-500/20 text-slate-400 hover:text-red-500 transition">
+                          class="btn-db p-1.5 rounded-lg hover:bg-red-500/20 text-slate-400 hover:text-red-500 transition">
                           <i data-lucide="trash-2" class="w-4 h-4"></i>
                         </button>
                       </div>

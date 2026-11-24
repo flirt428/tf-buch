@@ -1,7 +1,7 @@
 {
   "name": "Tf-Fahrzeugbuch",
   "short_name": "Tf-Buch",
-  "description": "Diensthistorie, Tz-Nummer und fahrzeugspezifische Eigenheiten & Macken für Triebfahrzeugführer",
+  "description": "Diensthistorie, Tz-Nummer und fahrzeugspezifische Eigenheiten & Störungen für Triebfahrzeugführer",
   "lang": "de",
   "id": "./",
   "start_url": "./index.html",
