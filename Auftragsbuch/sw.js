@@ -1,10 +1,10 @@
 // Service Worker – Auftragsbuch (bei Änderungen VERSION hochzählen)
-const VERSION = 'v9';
+const VERSION = 'v11';
 const CACHE = 'auftragsbuch-' + VERSION;
 const ASSETS = ['./', './index.html', './manifest.webmanifest',
   './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png',
   './icons/apple-touch-icon.png', './icons/favicon-32.png'];
-const FONTS = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap';
+const FONTS = 'https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600;700;800&display=swap';
 
 self.addEventListener('install', (event) => {
   event.waitUntil((async () => {
